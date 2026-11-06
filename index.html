@@ -61,6 +61,8 @@ select{font:inherit;border:2px solid var(--ink);padding:3px;background:#fff}
 .center{text-align:center}
 .msg{font-size:15px;line-height:1.8;padding:10px 4px;text-align:center}
 /* catch toast */
+.ftxt{position:absolute;z-index:7;transform:translate(-50%,-100%);font-weight:900;font-size:13px;color:#ffe9a8;text-shadow:0 2px 0 #2b2233,2px 0 0 #2b2233,-2px 0 0 #2b2233,0 -2px 0 #2b2233;white-space:nowrap;pointer-events:none;animation:ftxt 1.4s ease-out forwards}
+@keyframes ftxt{0%{opacity:0;margin-top:6px}15%{opacity:1;margin-top:0}75%{opacity:1}100%{opacity:0;margin-top:-22px}}
 #toast{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:6;background:var(--paper);border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:7px 12px;display:flex;gap:9px;align-items:center;font-size:13px;font-weight:800;max-width:92%;transition:opacity .3s,transform .3s;pointer-events:none}
 #toast.hide{opacity:0;transform:translate(-50%,10px)}
 #toast img{width:56px;height:32px;image-rendering:pixelated}
@@ -83,7 +85,7 @@ a{color:#ffcf6b}
   </div>
   <div id="sceneWrap">
     <canvas id="cv"></canvas>
-    <div class="beta">BETA v0.1.2</div>
+    <div class="beta">BETA v0.1.3</div>
     <div class="hud"><div class="chip" id="focusChip">⏳ 25:00</div><div class="chip" id="hWarm">🔥 0</div><div class="chip" id="hDust">✨ 0</div><div class="chip" id="hTime">🌙 00:00</div></div>
     <div id="toast" class="hide"><img id="tImg" alt=""><div><span id="tTitle"></span><small id="tSub"></small></div></div>
   </div>
@@ -122,10 +124,11 @@ function seeded(s) { return () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math
 
 // ============================================================ save
 const SAVE_KEY = 'sbc_save_v1';
-const DEF = { warmth: 0, dust: 0, fish: {}, dishes: 0, book: {}, lit: {}, done: [], up: { rod: 0, bait: 0, auto: 0 }, decor: [], gifts: 0, lastSeen: Date.now(), vol: { fire: .6, rain: 0, wave: .4, bug: .5, music: .35 }, autoOn: true, timeMode: 'real', meteorPreview: false, strip: false, summon: null, catches: 0, lang: null };
+const DEF = { warmth: 0, dust: 0, fish: {}, dishes: 0, book: {}, lit: {}, done: [], up: { rod: 0, bait: 0, auto: 0 }, decor: [], gifts: 0, lastSeen: Date.now(), vol: { fire: .6, rain: 0, wave: .4, bug: .5, music: .35 }, autoOn: true, timeMode: 'real', meteorPreview: false, strip: false, summon: null, catches: 0, lang: null, grill: [] };
 let G;
 try { G = Object.assign({}, DEF, JSON.parse(localStorage.getItem(SAVE_KEY) || '{}')); } catch (e) { G = Object.assign({}, DEF); }
 G.vol = Object.assign({}, DEF.vol, G.vol); G.up = Object.assign({}, DEF.up, G.up);
+if (!Array.isArray(G.grill)) G.grill = [];
 if (!G.lang) G.lang = /^zh/i.test(navigator.language || '') ? 'zh' : 'en';
 const T = (zh, en) => G.lang === 'en' ? en : zh;
 function save() { G.lastSeen = Date.now(); try { localStorage.setItem(SAVE_KEY, JSON.stringify(G)); } catch (e) {} }
@@ -392,6 +395,89 @@ function endFocus(done) {
   openPanel('focusDone', f);
 }
 
+// ============================================================ grill
+const SIDE = 7, GOLD0 = .85, GOLD1 = 1.25, OVER = 1.7, SLOTS = 3;
+const grillX = i => scen.fireX - 8 + i * 8;
+function placeFish(id) {
+  if (G.grill.length >= SLOTS) { showToast(null, T('烤架满了', 'The grill is full'), T('先把烤好的鱼装盘吧', 'Plate the finished fish first'), 1800); return false; }
+  if (!G.fish[id]) return false;
+  G.fish[id]--; if (G.fish[id] <= 0) delete G.fish[id];
+  G.grill.push({ id, t: 0, side: 0, pA: false, flip: 0 });
+  sfx.sizzle(); save(); return true;
+}
+function floatTxt(x, y, txt, col) {
+  const d = document.createElement('div'); d.className = 'ftxt'; d.textContent = txt; if (col) d.style.color = col;
+  d.style.left = (x / W * 100) + '%'; d.style.top = (y / H * 100) + '%';
+  wrap.appendChild(d); setTimeout(() => d.remove(), 1500);
+}
+function grillAct(i, auto) {
+  const s = G.grill[i]; if (!s) return;
+  const k = s.t / SIDE;
+  if (k < GOLD0 && !auto) { floatTxt(grillX(i), 90, T('还没烤好～', 'Not yet~'), '#fff'); sfx.tick(); return; }
+  const perfect = !auto && k <= GOLD1;
+  if (s.side === 0) {
+    s.side = 1; s.t = 0; s.pA = perfect; s.flip = .35; sfx.flip();
+    floatTxt(grillX(i), 90, perfect ? T('完美翻面！', 'Perfect flip!') : auto ? T('有点焦了', 'A bit charred') : T('翻面', 'Flipped'), perfect ? '#ffe96a' : '#fff');
+    for (let j = 0; j < 6; j++) fx.parts.push({ x: grillX(i), y: 96, vx: rand(-12, 12), vy: rand(-22, -8), life: rand(.4, .8), c: perfect ? '#ffe96a' : '#fff' });
+  } else {
+    const f = FM[s.id];
+    const mult = s.pA && perfect ? 1.5 : (s.pA || perfect) ? 1.2 : (auto ? .8 : 1);
+    const gain = Math.max(1, Math.round(f.v * mult));
+    G.warmth += gain; G.dishes++; G.grill.splice(i, 1);
+    const best = s.pA && perfect;
+    floatTxt(grillX(i), 88, (best ? T('完美烤鱼！', 'Perfect grill!') + ' ' : '') + '+' + gain + '🔥', best ? '#ffe96a' : '#ffd0a0');
+    if (best) { sfx.chime(); for (let j = 0; j < 16; j++) fx.parts.push({ x: grillX(i), y: 95, vx: rand(-25, 25), vy: rand(-40, -12), life: rand(.6, 1.2), c: pick(['#ffe96a', '#fff3b0', '#ffb06a']) }); }
+    else sfx.catch();
+    hud();
+  }
+  save();
+}
+let sizzleT = 0;
+function grillUpdate(dt) {
+  if (!G.grill.length) return;
+  sizzleT -= dt;
+  G.grill.forEach((s, i) => {
+    s.t += dt * (focus.on ? 1.25 : 1); s.flip = Math.max(0, s.flip - dt);
+    if (Math.random() < dt * 3) fx.parts.push({ x: grillX(i) + rand(-2, 2), y: 95, vx: rand(-3, 3), vy: rand(-14, -8), life: rand(.8, 1.5), c: s.t / SIDE > GOLD1 ? '#6a6a72' : '#c8c8d0', smoke: true });
+  });
+  if (sizzleT < 0) { sizzleT = rand(.25, .6); if (sound.ac && G.vol.fire > 0) sound.pop(); }
+  for (let i = G.grill.length - 1; i >= 0; i--) if (G.grill[i].t / SIDE > OVER) grillAct(i, true);
+}
+function doneCol(f, k) {
+  const raw = f.c ? f.c[0] : '#aaa';
+  if (k < GOLD0) return mix(raw.length === 7 ? raw : '#aaaaaa', '#c8925a', k / GOLD0);
+  if (k <= GOLD1) return '#e8a83a';
+  return mix('#e8a83a', '#4a3020', Math.min(1, (k - GOLD1) / (OVER - GOLD1)));
+}
+function drawGrill(nf) {
+  const fx0 = scen.fireX;
+  // stakes + grate
+  px(fx0 - 13, 98, 1, 10, '#555b66'); px(fx0 + 12, 98, 1, 10, '#555b66');
+  px(fx0 - 13, 99, 26, 1, '#8a909c');
+  for (let x = fx0 - 12; x < fx0 + 12; x += 3) px(x, 99, 1, 1, '#5a606c');
+  G.grill.forEach((s, i) => {
+    const f = FM[s.id], k = s.t / SIDE, x = Math.round(grillX(i)), y = 96;
+    const col = doneCol(f, s.side === 0 ? k : Math.min(k, OVER)), under = s.side === 1;
+    const sq = s.flip > 0 ? 1 : 0;
+    // fish 8x3 + tail
+    px(x - 3, y + sq, 6, 1, col); px(x - 4, y + 1, 8, 1 - sq, col); px(x - 3, y + 2, 6, 1, col);
+    px(x + 4, y, 1, 1, col); px(x + 4, y + 2, 1, 1, col);
+    px(x - 3, y + 1, 1, 1, '#2b2233');
+    if (under) { px(x - 1, y, 1, 3, 'rgba(60,30,10,.75)'); px(x + 2, y, 1, 3, 'rgba(60,30,10,.75)'); }
+    // progress bar
+    const prog = Math.min(1, k / GOLD0);
+    px(x - 4, 93, 8, 1, 'rgba(0,0,0,.45)');
+    px(x - 4, 93, Math.round(8 * prog), 1, k > GOLD1 ? '#ff6a4a' : k >= GOLD0 ? '#7be08a' : '#ffd27a');
+    // ready icon
+    if (k >= GOLD0) {
+      const bob = Math.round(Math.sin(tm * 8 + i) * 1);
+      const ic = k > GOLD1 ? '#ff6a4a' : '#ffe96a';
+      if (s.side === 0) { px(x - 1, 84 + bob, 3, 8, '#2b2233'); px(x, 85 + bob, 1, 4, ic); px(x, 90 + bob, 1, 1, ic); }
+      else { px(x - 3, 84 + bob, 7, 7, '#2b2233'); px(x - 2, 87 + bob, 1, 1, ic); px(x - 1, 88 + bob, 1, 1, ic); px(x, 89 + bob, 1, 1, ic); px(x + 1, 88 + bob, 1, 1, ic); px(x + 2, 87 + bob, 1, 1, ic); px(x + 2, 86 + bob, 1, 1, ic); }
+    }
+  });
+}
+
 // ============================================================ drawing
 function px(x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
 const DOG = ['.o.....o.', 'obo...obo', 'obbbbbbbo', 'obkbbbkbo', 'obbwnwbbo', '.obbbbbo.', 'obbbbbbbo', 'oobobobboo'.slice(0, 9)];
@@ -518,6 +604,7 @@ function draw(dt) {
     if (p.fire) { const k = p.life; c = k > .5 ? '#ffe36a' : k > .3 ? '#ff9a3c' : '#e84a2a'; if (p.burnCol) c = p.burnCol; }
     px(p.x, p.y, p.fire && p.life > .45 ? 2 : 1, 1, c);
   }
+  drawGrill(nf);
   for (const hh of fx.hearts) { px(hh.x, hh.y, 1, 1, '#ff6a8a'); px(hh.x + 2, hh.y, 1, 1, '#ff6a8a'); px(hh.x, hh.y + 1, 3, 1, '#ff6a8a'); px(hh.x + 1, hh.y + 2, 1, 1, '#ff6a8a'); }
   if (dogSleep) { const z = Math.floor(tm * 1.5) % 3; for (let i = 0; i <= z; i++) px(dx + 10 + i * 3, dy - 3 - i * 3, 2, 1, '#cfd6ff'); }
   // rain
@@ -531,7 +618,7 @@ function update(dt) {
   tm += dt;
   const h = hourNow(), nf = nightFactor(h);
   // particles
-  for (const p of fx.parts) { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; if (!p.fire) p.vy += 30 * dt; }
+  for (const p of fx.parts) { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; if (!p.fire && !p.smoke) p.vy += 30 * dt; }
   fx.parts = fx.parts.filter(p => p.life > 0);
   for (const r of fx.ripples) r.r += dt * 8; fx.ripples = fx.ripples.filter(r => r.r < 10);
   for (const hh of fx.hearts) { hh.y -= dt * 10; hh.life -= dt; } fx.hearts = fx.hearts.filter(h => h.life > 0);
@@ -559,6 +646,7 @@ function update(dt) {
   if (focus.on) { const left = Math.max(0, focus.end - Date.now()); $('#focusChip').textContent = '⏳ ' + String(Math.floor(left / 60000)).padStart(2, '0') + ':' + String(Math.floor(left / 1000) % 60).padStart(2, '0'); if (left <= 0) endFocus(true); }
   // burn effect
   if (fx.burn) { fx.burn.t += dt; if (fx.burn.t < 1.6) for (let i = 0; i < 4; i++) fx.parts.push({ x: scen.fireX + rand(-4, 4), y: 104, vx: rand(-10, 10), vy: rand(-40, -20), life: rand(.5, 1.1), fire: true, burnCol: pick(['#b0a0ff', '#ffb0e0', '#a0e0ff', '#fff3b0']) }); else fx.burn = null; }
+  grillUpdate(dt);
   sound.update(nf);
 }
 function frame(now) { const dt = Math.min(.1, (now - last) / 1000); last = now; update(dt); draw(dt); requestAnimationFrame(frame); }
@@ -615,10 +703,11 @@ cv.addEventListener('pointerdown', e => {
   sound.start();
   const [x, y] = sceneXY(e);
   for (const s of fx.shoots) if (Math.hypot(s.x - x, s.y - y) < 14) { s.life = 0; G.dust += meteorToday() ? 3 : 2; sfx.chime(); showToast(null, T('🌠 许了一个愿', '🌠 You made a wish'), T('星屑 +', 'Stardust +') + (meteorToday() ? 3 : 2), 1800); hud(); return; }
-  if (fishing.st === 'bite' && !reel.on) { startReel(); return; }
+  for (let i = 0; i < G.grill.length; i++) if (Math.abs(x - grillX(i)) <= 4.5 && y > 83 && y < 102) { grillAct(i); return; }
   if (visitor && visitor.wait && Math.abs(x - (visitor.x + 5)) < 10 && y > 84) { giftVisitor(); return; }
   if (Math.abs(x - (scen.fireX - 18)) < 9 && y > 92 && y < 110) { dogHappy(); sfx.woof(); return; }
-  if (Math.abs(x - scen.fireX) < 10 && y > 94 && y < 112) { openPanel('cook'); return; }
+  if (fishing.st === 'bite' && !reel.on) { startReel(); return; }
+  if (Math.abs(x - scen.fireX) < 14 && y > 92 && y < 112) { openPanel('cook'); return; }
   if (fishing.st === 'wait' && !G.autoOn) { fishing.wait = Math.min(fishing.wait, fishing.t + rand(1, 4)); }
 });
 const DECOR = [
@@ -655,12 +744,12 @@ function openPanel(p, arg) {
   const ok = T('好', 'OK');
   if (p === 'cook') {
     const ids = Object.keys(G.fish).filter(k => G.fish[k] > 0);
-    h = head(T('🍳 营火烹饪', '🍳 Campfire Cooking'), T(`把鱼烤成料理，获得暖意 🔥（用来升级和买装饰）。料理也可以送给来访的狐狸。<br>库存料理：<b>${G.dishes}</b> 份`, `Grill fish into dishes to earn Warmth 🔥 (spend it on upgrades and decorations). Dishes can also be gifted to the visiting fox.<br>Dishes in stock: <b>${G.dishes}</b>`));
+    h = head(T('🍳 营火烹饪', '🍳 Campfire Cooking'), T(`把鱼放上营火的<b>烤架</b>：进度条变绿、头上出现「!」时<b>点鱼翻面</b>；另一面也烤好时<b>再点一次装盘</b>。两面都在金黄时完成 = <b>完美烤鱼，暖意 ×1.5</b>。放着不管也会自动出锅，只是有点焦。<br>烤架 <b>${G.grill.length}</b>/${SLOTS} · 库存料理 <b>${G.dishes}</b> 份（可以送给来访的狐狸）`, `Put fish on the campfire <b>grill</b>: when the bar turns green and “!” appears, <b>tap the fish to flip it</b>; when the other side is done, <b>tap again to plate it</b>. Both sides golden = <b>Perfect grill, Warmth ×1.5</b>. Left alone, fish still come off the grill — just a bit charred.<br>Grill <b>${G.grill.length}</b>/${SLOTS} · Dishes in stock: <b>${G.dishes}</b> (gift them to the visiting fox)`));
     if (!ids.length) h += `<div class="msg">${T('还没有鱼呢。<br>等等浮漂，或者点它亲手收竿吧。', 'No fish yet.<br>Wait for the bobber, or tap it to reel one in yourself.')}</div>`;
     else {
       const n = ids.reduce((a, k) => a + G.fish[k], 0), w = ids.reduce((a, k) => a + G.fish[k] * FM[k].v, 0);
-      h += `<div class="row"><div class="grow"><b>${T('全部烤掉', 'Grill everything')}</b><small>${T(`共 ${n} 条，暖意 +${w}`, `${n} fish · Warmth +${w}`)}</small></div><button class="btn" data-cook="all">${T('🔥 烤', '🔥 Grill')}</button></div>`;
-      for (const k of ids) h += `<div class="row"><img class="fish" src="${fishSprite(FM[k])}"><div class="grow"><b>${fname(FM[k])}</b> ×${G.fish[k]}<small>${T(`每条 ${FM[k].v} 🔥`, `${FM[k].v} 🔥 each`)}</small></div><button class="btn" data-cook="${k}">${T('烤一条', 'Grill one')}</button></div>`;
+      h += `<div class="row"><div class="grow"><b>${T('⚡ 一键快烤全部', '⚡ Quick-cook all')}</b><small>${T(`共 ${n} 条，暖意 +${w}（没有完美加成）`, `${n} fish · Warmth +${w} (no perfect bonus)`)}</small></div><button class="btn alt" data-cook="all">${T('快烤', 'Quick')}</button></div>`;
+      for (const k of ids) h += `<div class="row"><img class="fish" src="${fishSprite(FM[k])}"><div class="grow"><b>${fname(FM[k])}</b> ×${G.fish[k]}<small>${T(`每条 ${FM[k].v} 🔥 · 完美 ${Math.round(FM[k].v * 1.5)} 🔥`, `${FM[k].v} 🔥 each · perfect ${Math.round(FM[k].v * 1.5)} 🔥`)}</small></div><button class="btn" data-grill="${k}" ${G.grill.length >= SLOTS ? 'disabled' : ''}>${T('🍢 上烤架', '🍢 To grill')}</button></div>`;
     }
     h += `<h2 style="margin-top:12px;font-size:15px">${T('升级', 'Upgrades')} <span style="font-size:12px">${T('暖意', 'Warmth')} 🔥 ${G.warmth}</span></h2>`;
     const UP = [['rod', T('鱼竿', 'Fishing Rod'), T('收竿时绿色区域更宽', 'Wider green zone when reeling')], ['bait', T('鱼饵', 'Bait'), T('鱼更快上钩', 'Fish bite sooner')], ['auto', T('自动渔具', 'Auto Gear'), T('挂机时更容易钓到', 'Better catch rate while idle')]];
@@ -698,7 +787,7 @@ function openPanel(p, arg) {
     const L = [['fire', T('🔥 营火噼啪', '🔥 Crackling fire')], ['wave', T('🌊 湖水', '🌊 Lake water')], ['bug', T('🦗 虫鸣（夜晚）', '🦗 Crickets (night)')], ['rain', T('🌧 雨声', '🌧 Rain')], ['music', T('🎷 Lofi 爵士', '🎷 Lofi jazz')]];
     for (const [k, n] of L) h += `<div class="row"><div style="width:130px">${n}</div><div class="grow"><input type="range" min="0" max="1" step=".05" value="${G.vol[k]}" data-vol="${k}"></div></div>`;
   } else if (p === 'set') {
-    h = head(T('⚙ 设置 · Beta v0.1.2', '⚙ Settings · Beta v0.1.2'), T('这是测试版：玩法、数值和存档可能会在后续版本中调整或重置。', 'This is a beta: gameplay, balance and save data may change or be reset in future versions.'));
+    h = head(T('⚙ 设置 · Beta v0.1.3', '⚙ Settings · Beta v0.1.3'), T('这是测试版：玩法、数值和存档可能会在后续版本中调整或重置。', 'This is a beta: gameplay, balance and save data may change or be reset in future versions.'));
     h += `<div class="row"><div class="grow"><b>${T('语言 Language', 'Language 语言')}</b><small>${T('界面、鱼和星座名称都会切换', 'Switches the interface, fish and constellation names')}</small></div><select id="sLang"><option value="zh">简体中文</option><option value="en">English</option></select></div>`;
     h += `<div class="row"><div class="grow"><b>${T('时间', 'Time')}</b><small>${T('默认跟随你的真实时间；白天测试时可以切到夜晚看星空', 'Follows your real clock by default; switch to night to see the stars during the day')}</small></div><select id="sTime"><option value="real">${T('跟随真实时间', 'Real time')}</option><option value="day">${T('体验：白天', 'Preview: Day')}</option><option value="dusk">${T('体验：黄昏', 'Preview: Dusk')}</option><option value="night">${T('体验：夜晚', 'Preview: Night')}</option></select></div>`;
     h += `<div class="row"><div class="grow"><b>${T('预览流星雨', 'Preview meteor shower')}</b><small>${T('真实的流星雨日期会自动开启；下一场：', 'Turns on automatically on real meteor-shower dates. Next: ')}${nextMeteor()}</small></div><button class="btn ${G.meteorPreview ? '' : 'alt'}" id="sMet">${G.meteorPreview ? T('开', 'On') : T('关', 'Off')}</button></div>`;
@@ -710,6 +799,7 @@ function openPanel(p, arg) {
   card.innerHTML = h; panel.classList.remove('hide');
   // bindings
   card.querySelectorAll('[data-cook]').forEach(b => b.onclick = () => { const k = b.dataset.cook; const list = k === 'all' ? Object.keys(G.fish) : [k]; let gain = 0, n = 0; for (const id of list) { const c = k === 'all' ? G.fish[id] : Math.min(1, G.fish[id]); gain += c * FM[id].v; n += c; G.fish[id] -= c; if (G.fish[id] <= 0) delete G.fish[id]; } G.warmth += gain; G.dishes += n; sfx.sizzle(); for (let i = 0; i < 12; i++) fx.parts.push({ x: scen.fireX + rand(-3, 3), y: 100, vx: rand(-8, 8), vy: rand(-30, -15), life: rand(.6, 1.2), c: '#e8e8e8' }); hud(); save(); openPanel('cook'); });
+  card.querySelectorAll('[data-grill]').forEach(b => b.onclick = () => { if (placeFish(b.dataset.grill)) { if (G.grill.length >= SLOTS || !Object.keys(G.fish).length) { closePanel(); showToast(FM[b.dataset.grill], T('🍢 烤上了！', '🍢 On the grill!'), T('进度条变绿、出现「!」时点鱼翻面', 'When the bar turns green and “!” appears, tap the fish to flip'), 3200); } else openPanel('cook'); } });
   card.querySelectorAll('[data-up]').forEach(b => b.onclick = () => { const k = b.dataset.up, cost = 15 + G.up[k] * 20; if (G.warmth < cost) return; G.warmth -= cost; G.up[k]++; sfx.chime(); hud(); save(); openPanel('cook'); });
   card.querySelectorAll('[data-dec]').forEach(b => b.onclick = () => { const d = DECOR.find(x => x.id === b.dataset.dec); if (G.warmth < d.cost) return; G.warmth -= d.cost; G.decor.push(d.id); sfx.chime(); hud(); save(); openPanel('cook'); });
   card.querySelectorAll('[data-lit]').forEach(b => b.onclick = () => { const k = b.dataset.lit; if (G.dust < consCost()) return; G.dust -= consCost(); G.lit[k] = (G.lit[k] || 0) + 1; sfx.twinkle(); hud(); save(); openPanel('star'); });
@@ -846,6 +936,7 @@ const sfx = {
   catch: () => [784, 988, 1175].forEach((f, i) => sound.tone(f, .3, 'triangle', .06, 0, i * .08)),
   legend: () => [523, 659, 784, 1047, 1319, 1568].forEach((f, i) => sound.tone(f, .8, 'sine', .07, 0, i * .1)),
   tick: () => sound.tone(1200, .06, 'square', .04),
+  flip: () => { sound.tone(500, .08, 'triangle', .06, 300); sfx.sizzle(); },
   chime: () => [1047, 1319, 1568].forEach((f, i) => sound.tone(f, .9, 'sine', .05, 0, i * .12)),
   twinkle: () => [1568, 2093].forEach((f, i) => sound.tone(f, .6, 'sine', .05, 0, i * .08)),
   sizzle: () => { if (!sound.ac) return; for (let i = 0; i < 10; i++) setTimeout(() => sound.pop(), i * 40); },
@@ -861,8 +952,8 @@ function applyLang() {
   document.querySelectorAll('[data-k]').forEach(e => { e.textContent = T(UI[e.dataset.k][0], UI[e.dataset.k][1]); });
   $('#reelNote').textContent = T('点击屏幕任意处收竿', 'Tap anywhere to reel in');
   $('#intro').innerHTML = T(
-    '<b style="color:#ffe9a8;font-size:15px">钓星营地 · Star Bait Camp</b><br>屏幕底部的小营地陪你工作；今晚真实的星空，决定你钓到什么。<br><span style="opacity:.75">这是 <b>Beta 测试版 v0.1.2</b>：玩法和存档随时可能调整。点「⚙」可以切换夜晚、预览流星雨。<br>点湖面上的浮漂收竿 · 挂机也会自动钓鱼 · 传说鱼需要亲手拉上来</span><br><span style="opacity:.5;font-size:11px">© 2026 wilsonmah 版权所有 · <a href="https://github.com/wilsonmah/star-bait-camp/issues" target="_blank" rel="noopener">反馈建议</a></span>',
-    '<b style="color:#ffe9a8;font-size:15px">Star Bait Camp · 钓星营地</b><br>A tiny camp at the bottom of your screen keeps you company — tonight’s real sky decides what you catch.<br><span style="opacity:.75">This is <b>Beta v0.1.2</b>: gameplay and saves may change anytime. Open “⚙” to switch to night or preview a meteor shower.<br>Tap the bobber to reel in · The camp also fishes on its own · Legendary fish must be landed by hand</span><br><span style="opacity:.5;font-size:11px">© 2026 wilsonmah · All Rights Reserved · <a href="https://github.com/wilsonmah/star-bait-camp/issues" target="_blank" rel="noopener">Feedback</a></span>');
+    '<b style="color:#ffe9a8;font-size:15px">钓星营地 · Star Bait Camp</b><br>屏幕底部的小营地陪你工作；今晚真实的星空，决定你钓到什么。<br><span style="opacity:.75">这是 <b>Beta 测试版 v0.1.3</b>：玩法和存档随时可能调整。点「⚙」可以切换夜晚、预览流星雨。<br>点湖面上的浮漂收竿 · 挂机也会自动钓鱼 · 传说鱼需要亲手拉上来</span><br><span style="opacity:.5;font-size:11px">© 2026 wilsonmah 版权所有 · <a href="https://github.com/wilsonmah/star-bait-camp/issues" target="_blank" rel="noopener">反馈建议</a></span>',
+    '<b style="color:#ffe9a8;font-size:15px">Star Bait Camp · 钓星营地</b><br>A tiny camp at the bottom of your screen keeps you company — tonight’s real sky decides what you catch.<br><span style="opacity:.75">This is <b>Beta v0.1.3</b>: gameplay and saves may change anytime. Open “⚙” to switch to night or preview a meteor shower.<br>Tap the bobber to reel in · The camp also fishes on its own · Legendary fish must be landed by hand</span><br><span style="opacity:.5;font-size:11px">© 2026 wilsonmah · All Rights Reserved · <a href="https://github.com/wilsonmah/star-bait-camp/issues" target="_blank" rel="noopener">Feedback</a></span>');
   layout();
 }
 
