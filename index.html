@@ -79,28 +79,29 @@ a{color:#ffcf6b}
 <body>
 <div id="app">
   <div id="below">
-    <div><b style="color:#ffe9a8;font-size:15px">钓星营地 · Star Bait Camp</b><br>屏幕底部的小营地陪你工作；今晚真实的星空，决定你钓到什么。<br><span style="opacity:.75">这是 <b>Beta 测试版 v0.1.1</b>：玩法和存档随时可能调整。点「⚙」可以切换夜晚、预览流星雨。<br>点湖面上的浮漂收竿 · 挂机也会自动钓鱼 · 传说鱼需要亲手拉上来</span><br><span style="opacity:.5;font-size:11px">© 2026 wilsonmah 版权所有 · <a href="https://github.com/wilsonmah/star-bait-camp/issues" target="_blank" rel="noopener">反馈建议</a></span></div>
+    <div id="intro"></div>
   </div>
   <div id="sceneWrap">
     <canvas id="cv"></canvas>
-    <div class="beta">BETA v0.1.1</div>
+    <div class="beta">BETA v0.1.2</div>
     <div class="hud"><div class="chip" id="focusChip">⏳ 25:00</div><div class="chip" id="hWarm">🔥 0</div><div class="chip" id="hDust">✨ 0</div><div class="chip" id="hTime">🌙 00:00</div></div>
     <div id="toast" class="hide"><img id="tImg" alt=""><div><span id="tTitle"></span><small id="tSub"></small></div></div>
   </div>
   <div class="bar" id="bar">
-    <button class="tb on" id="bAuto"><i>🎣</i><span>挂机钓鱼</span></button>
-    <button class="tb" data-p="cook"><i>🍳</i><span>营火烹饪</span></button>
-    <button class="tb" data-p="star"><i>✨</i><span>星图</span></button>
-    <button class="tb" data-p="book"><i>📖</i><span>手帐</span></button>
-    <button class="tb" data-p="focus"><i>⏳</i><span>专注</span></button>
-    <button class="tb" data-p="worry"><i>📝</i><span>烧烦恼</span></button>
-    <button class="tb" data-p="sound"><i>🎧</i><span>声音</span></button>
-    <button class="tb" id="bStrip"><i>▭</i><span>条状模式</span></button>
-    <button class="tb" data-p="set"><i>⚙</i><span>设置</span></button>
+    <button class="tb on" id="bAuto"><i>🎣</i><span data-k="auto">挂机钓鱼</span></button>
+    <button class="tb" data-p="cook"><i>🍳</i><span data-k="cook">营火烹饪</span></button>
+    <button class="tb" data-p="star"><i>✨</i><span data-k="star">星图</span></button>
+    <button class="tb" data-p="book"><i>📖</i><span data-k="book">手帐</span></button>
+    <button class="tb" data-p="focus"><i>⏳</i><span data-k="focus">专注</span></button>
+    <button class="tb" data-p="worry"><i>📝</i><span data-k="worry">烧烦恼</span></button>
+    <button class="tb" data-p="sound"><i>🎧</i><span data-k="sound">声音</span></button>
+    <button class="tb" id="bStrip"><i>▭</i><span data-k="strip">条状模式</span></button>
+    <button class="tb" id="bLang"><i>🌐</i><span data-k="lang">English</span></button>
+    <button class="tb" data-p="set"><i>⚙</i><span data-k="set">设置</span></button>
   </div>
 </div>
 <div id="panel" class="hide"><div class="card" id="card"></div></div>
-<div id="reel" class="hide"><div id="reelBox"><div id="reelTxt">鱼上钩了！在绿色区域点击</div><div id="reelBar"><div id="reelZone"></div><div id="reelMark"></div></div><div class="note">点击屏幕任意处收竿</div></div></div>
+<div id="reel" class="hide"><div id="reelBox"><div id="reelTxt">鱼上钩了！在绿色区域点击</div><div id="reelBar"><div id="reelZone"></div><div id="reelMark"></div></div><div class="note" id="reelNote">点击屏幕任意处收竿</div></div></div>
 
 <script>
 /*!
@@ -121,10 +122,12 @@ function seeded(s) { return () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math
 
 // ============================================================ save
 const SAVE_KEY = 'sbc_save_v1';
-const DEF = { warmth: 0, dust: 0, fish: {}, dishes: 0, book: {}, lit: {}, done: [], up: { rod: 0, bait: 0, auto: 0 }, decor: [], gifts: 0, lastSeen: Date.now(), vol: { fire: .6, rain: 0, wave: .4, bug: .5, music: .35 }, autoOn: true, timeMode: 'real', meteorPreview: false, strip: false, summon: null, catches: 0 };
+const DEF = { warmth: 0, dust: 0, fish: {}, dishes: 0, book: {}, lit: {}, done: [], up: { rod: 0, bait: 0, auto: 0 }, decor: [], gifts: 0, lastSeen: Date.now(), vol: { fire: .6, rain: 0, wave: .4, bug: .5, music: .35 }, autoOn: true, timeMode: 'real', meteorPreview: false, strip: false, summon: null, catches: 0, lang: null };
 let G;
 try { G = Object.assign({}, DEF, JSON.parse(localStorage.getItem(SAVE_KEY) || '{}')); } catch (e) { G = Object.assign({}, DEF); }
 G.vol = Object.assign({}, DEF.vol, G.vol); G.up = Object.assign({}, DEF.up, G.up);
+if (!G.lang) G.lang = /^zh/i.test(navigator.language || '') ? 'zh' : 'en';
+const T = (zh, en) => G.lang === 'en' ? en : zh;
 function save() { G.lastSeen = Date.now(); try { localStorage.setItem(SAVE_KEY, JSON.stringify(G)); } catch (e) {} }
 setInterval(save, 5000);
 
@@ -135,6 +138,8 @@ function hourNow() {
 }
 function phaseOf(h) { return (h >= 20 || h < 5) ? 'night' : h < 7 ? 'dawn' : h < 17 ? 'day' : 'dusk'; }
 const PHASE_CN = { night: '夜晚', dawn: '清晨', day: '白天', dusk: '黄昏' };
+const PHASE_EN = { night: 'night', dawn: 'dawn', day: 'daytime', dusk: 'dusk' };
+const phaseName = p => T(PHASE_CN[p], PHASE_EN[p]);
 function nightFactor(h) {
   if (h >= 21 || h < 4.5) return 1;
   if (h >= 4.5 && h < 7) return 1 - (h - 4.5) / 2.5;
@@ -149,11 +154,14 @@ function moonInfo() {
   const jd = Date.now() / 86400000 + 2440587.5, syn = 29.530588853;
   const age = ((jd - 2451550.1) % syn + syn) % syn;
   const illum = (1 - Math.cos(2 * Math.PI * age / syn)) / 2;
-  const names = ['🌑 新月', '🌒 娥眉月', '🌓 上弦月', '🌔 盈凸月', '🌕 满月', '🌖 亏凸月', '🌗 下弦月', '🌘 残月'];
+  const names = T(['🌑 新月', '🌒 娥眉月', '🌓 上弦月', '🌔 盈凸月', '🌕 满月', '🌖 亏凸月', '🌗 下弦月', '🌘 残月'], ['🌑 New Moon', '🌒 Waxing Crescent', '🌓 First Quarter', '🌔 Waxing Gibbous', '🌕 Full Moon', '🌖 Waning Gibbous', '🌗 Last Quarter', '🌘 Waning Crescent']);
   return { age, illum, waxing: age < syn / 2, name: names[Math.round(age / syn * 8) % 8] };
 }
 function season() { const m = new Date().getMonth() + 1; return m <= 2 || m === 12 ? 'winter' : m <= 5 ? 'spring' : m <= 8 ? 'summer' : 'autumn'; }
 const METEORS = [[1, 3, '象限仪座'], [4, 22, '天琴座'], [5, 6, '宝瓶座η'], [8, 12, '英仙座'], [10, 21, '猎户座'], [11, 17, '狮子座'], [12, 14, '双子座']];
+const METEOR_EN = { '象限仪座': 'Quadrantid', '天琴座': 'Lyrid', '宝瓶座η': 'Eta Aquariid', '英仙座': 'Perseid', '猎户座': 'Orionid', '狮子座': 'Leonid', '双子座': 'Geminid', '预览': 'Preview' };
+const mname = n => T(n, METEOR_EN[n] || n);
+const MONTH_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 function meteorToday() {
   if (G.meteorPreview) return '预览';
   const d = new Date();
@@ -162,7 +170,7 @@ function meteorToday() {
 }
 function nextMeteor() {
   const d = new Date();
-  for (let y = d.getFullYear(); y <= d.getFullYear() + 1; y++) for (const [m, day, n] of METEORS) { const p = new Date(y, m - 1, day); if (p > d) return `${m} 月 ${day} 日 ${n}流星雨`; }
+  for (let y = d.getFullYear(); y <= d.getFullYear() + 1; y++) for (const [m, day, n] of METEORS) { const p = new Date(y, m - 1, day); if (p > d) return T(`${m} 月 ${day} 日 ${n}流星雨`, `${MONTH_EN[m - 1]} ${day} · ${METEOR_EN[n]} meteor shower`); }
   return '';
 }
 
@@ -178,6 +186,8 @@ const CONS = {
   orion: { name: '猎户座', fish: 'orion', s: [[.15, .05], [.85, .12], [.4, .5], [.5, .52], [.6, .54], [.2, .95], [.8, .9]], l: [[0, 2], [1, 4], [2, 3], [3, 4], [2, 5], [4, 6]], seasons: ['winter', 'autumn'] },
   gemini: { name: '双子座', fish: 'gemini', s: [[.2, 0], [.55, .05], [.15, .5], [.55, .55], [.1, .95], [.5, .98]], l: [[0, 2], [2, 4], [1, 3], [3, 5], [0, 1]], seasons: ['winter'] }
 };
+const CONS_EN = { dipper: 'Big Dipper', leo: 'Leo', lyra: 'Lyra', cygnus: 'Cygnus', scorpius: 'Scorpius', cassiopeia: 'Cassiopeia', pegasus: 'Pegasus', orion: 'Orion', gemini: 'Gemini' };
+const cname = k => T(CONS[k].name, CONS_EN[k]);
 function visibleCons() { const s = season(); return Object.keys(CONS).filter(k => CONS[k].seasons.includes(s)); }
 const consCost = () => 3;
 
@@ -213,7 +223,22 @@ const LEGEND = {
 };
 for (const k in LEGEND) FISH.push({ id: 'L_' + k, name: LEGEND[k].name, v: 30, w: 0, legend: k, c: LEGEND[k].c, glow: LEGEND[k].glow, note: `${CONS[k].name}的守护者，只回应点亮整座星座的人。` });
 const FM = Object.fromEntries(FISH.map(f => [f.id, f]));
+const FISH_EN = {
+  crucian: ['Little Crucian', 'The lake’s most familiar old friend.'], medaka: ['Medaka', 'Tiny, but swims very earnestly.'],
+  grouper: ['Creek Grouper', 'Suns itself between the rocks by day.'], bass: ['Chubby Bass', 'Always looks like it just had a big meal.'],
+  trout: ['Silver Trout', 'Only shows up while the sky is changing color.'], leafbream: ['Leaf Bream', 'Autumn only — colored like maple leaves.'],
+  snowscale: ['Snowscale', 'Winter only — cool to the touch.'], blossom: ['Blossom Scale', 'Spring only — brings a good mood.'],
+  firefly: ['Firefly Minnow', 'Its tail glows, like a firefly that fell into the water.'], glowcat: ['Glow Catfish', 'Its whiskers sparkle at night.'],
+  raindrop: ['Raindrop Fish', 'Only comes out when it rains.'], moonkoi: ['Moonshadow Koi', 'Rises to the surface only on full-moon nights.'],
+  neweel: ['New-moon Eel', 'Roams only on moonless nights.'], meteor: ['Meteor Fish', 'Fell from the sky into the lake on a meteor-shower night.'],
+  boot: ['Old Boot', '…who left this here?'], bottle: ['Message in a Bottle', 'There’s a note inside.']
+};
+const LEGEND_EN = { dipper: 'Dipper Spoonbill', leo: 'Lionmane Goldfish', lyra: 'Lyre-string Silverfish', cygnus: 'White-plume Swanfish', scorpius: 'Scarlet Scorptail', cassiopeia: 'Queen’s Crown Fish', pegasus: 'Pegasus Flying Fish', orion: 'Orion Silver Salmon', gemini: 'Twin Star Fish' };
+const fname = f => G.lang === 'en' ? (f.legend ? LEGEND_EN[f.legend] : FISH_EN[f.id][0]) : f.name;
+const fnote = f => G.lang === 'en' ? (f.legend ? `Guardian of ${CONS_EN[f.legend]}. It answers only to those who light up the whole constellation.` : FISH_EN[f.id][1]) : f.note;
 const BOTTLE_MSGS = ['今天也辛苦了。你已经做得很好了。', '慢一点也没关系，湖水也是慢慢流的。', '如果累了，就坐下来看看火吧。', '你不需要每天都很厉害。', '有人在很远的地方，也在看同一片星空。', '把今天放下，明天会自己来的。', '谢谢你，愿意好好照顾自己。', '下雨天也有下雨天的鱼。'];
+const BOTTLE_EN = ['You worked hard today. You’ve done really well.', 'It’s okay to go slowly — the lake flows slowly too.', 'If you’re tired, sit down and watch the fire for a while.', 'You don’t have to be amazing every day.', 'Someone far away is looking at the same starry sky.', 'Set today down. Tomorrow will come on its own.', 'Thank you for taking good care of yourself.', 'Rainy days have their own fish, too.'];
+const COMFORT_EN = ['The fire carried it away. Let yourself feel a little lighter tonight.', 'Your worry became sparks and flew off toward the stars.', 'It has burned away. Leave the rest to tomorrow.', 'You said it out loud — that’s already brave.', 'The firelight is warm. You deserve to be treated this gently.', 'Smoke clears, clouds clear, and worries will too.', 'There. Now it’s just the campfire, the lake, and you.'];
 const COMFORT = ['火把它带走了。今晚，让自己轻一点。', '烦恼变成了火星，飞去星星那边了。', '它已经烧完了。剩下的，交给明天吧。', '你说出来了，这已经很勇敢。', '火光暖暖的。你值得被这样温柔地对待。', '烟会散，云会散，烦恼也会。', '好了，现在只剩下营火、湖水和你。'];
 
 // fish sprite generator (24x14 pixel art)
@@ -324,7 +349,7 @@ function onBite() {
   fishing.st = 'bite'; fishing.bite = f; fishing.biteT = 0;
   sfx.bite();
   fx.ripples.push({ x: fishing.bobX, y: fishing.bobY, r: 0 }, { x: fishing.bobX, y: fishing.bobY, r: -3 });
-  if (f.legend) showToast(f, '✨ 传说鱼上钩了！', '它不会自己上来——点浮漂亲手收竿', 5200);
+  if (f.legend) showToast(f, T('✨ 传说鱼上钩了！', '✨ A legendary fish bit!'), T('它不会自己上来——点浮漂亲手收竿', 'It won’t come up on its own — tap the bobber to reel it in'), 5200);
 }
 function biteWindow(f) { return f.legend ? 8 : G.autoOn ? 2.2 : 3; }
 function autoResolve() {
@@ -335,33 +360,33 @@ function autoResolve() {
 }
 function escape(quiet) {
   fishing.st = 'gone'; fishing.t = 0;
-  if (!quiet) showToast(null, '跑掉了～', '没关系，湖里还有很多鱼', 1800);
+  if (!quiet) showToast(null, T('跑掉了～', 'It got away~'), T('没关系，湖里还有很多鱼', 'No worries, there are plenty of fish in the lake'), 1800);
 }
 function land(f, auto) {
   fishing.st = 'gone'; fishing.t = 0;
   G.catches++;
   const first = !G.book[f.id];
-  G.book[f.id] = G.book[f.id] || { n: 0, first: new Date().toLocaleDateString('zh-CN') };
+  G.book[f.id] = G.book[f.id] || { n: 0, first: new Date().toLocaleDateString(G.lang === 'en' ? 'en-US' : 'zh-CN') };
   G.book[f.id].n++;
-  let sub = f.note;
-  if (f.junk === 'bottle') { const m = pick(BOTTLE_MSGS); sub = `纸条上写着：「${m}」`; G.warmth += 2; }
+  let sub = fnote(f);
+  if (f.junk === 'bottle') { const i = Math.floor(Math.random() * BOTTLE_MSGS.length); sub = T(`纸条上写着：「${BOTTLE_MSGS[i]}」`, `The note says: “${BOTTLE_EN[i]}”`); G.warmth += 2; }
   else if (f.junk !== 'boot') G.fish[f.id] = (G.fish[f.id] || 0) + 1;
   const night = nightFactor(hourNow()) > .6;
   if (night && !f.junk) G.dust += (f.legend ? 5 : f.v >= 6 ? 2 : 1) + (G.decor.includes('scope') ? 1 : 0);
   if (f.legend) { if (!G.done.includes(f.legend)) G.done.push(f.legend); G.summon = null; summonGlow = 0; flash = 1; sfx.legend(); for (let i = 0; i < 40; i++) fx.parts.push({ x: fishing.bobX, y: fishing.bobY, vx: rand(-30, 30), vy: rand(-50, -10), life: rand(.8, 1.6), c: pick(['#fff3b0', '#ffffff', '#b0d8ff']) }); }
   else sfx.catch();
-  showToast(f, (first ? '🆕 ' : '') + (auto ? '挂机钓到了 ' : '钓到了 ') + f.name + (f.v ? `（${f.v}🔥）` : ''), sub, f.legend ? 5000 : 2600);
+  showToast(f, (first ? '🆕 ' : '') + (auto ? T('挂机钓到了 ', 'Auto-caught ') : T('钓到了 ', 'Caught ')) + fname(f) + (f.v ? T(`（${f.v}🔥）`, ` (${f.v}🔥)`) : ''), sub, f.legend ? 5000 : 2600);
   if (Math.random() < .5) dogHappy();
   hud(); save();
 }
 
 // focus timer
 const focus = { on: false, end: 0, len: 0 };
-function startFocus(min) { focus.on = true; focus.len = min; focus.end = Date.now() + min * 60000; $('#focusChip').style.display = 'block'; closePanel(); showToast(null, `⏳ 专注 ${min} 分钟开始`, '营火会烧得更旺，营地帮你继续钓鱼', 2600); }
+function startFocus(min) { focus.on = true; focus.len = min; focus.end = Date.now() + min * 60000; $('#focusChip').style.display = 'block'; closePanel(); showToast(null, T(`⏳ 专注 ${min} 分钟开始`, `⏳ ${min}-minute focus started`), T('营火会烧得更旺，营地帮你继续钓鱼', 'The fire burns brighter and the camp keeps fishing for you'), 2600); }
 function endFocus(done) {
   focus.on = false; $('#focusChip').style.display = 'none';
   if (!done) return;
-  const f = rollFish(); G.fish[f.id] = (G.fish[f.id] || 0) + 1; G.book[f.id] = G.book[f.id] || { n: 0, first: new Date().toLocaleDateString('zh-CN') }; G.book[f.id].n++;
+  const f = rollFish(); G.fish[f.id] = (G.fish[f.id] || 0) + 1; G.book[f.id] = G.book[f.id] || { n: 0, first: new Date().toLocaleDateString(G.lang === 'en' ? 'en-US' : 'zh-CN') }; G.book[f.id].n++;
   G.dust += 3; G.warmth += focus.len;
   sfx.chime(); hud(); save();
   openPanel('focusDone', f);
@@ -543,7 +568,7 @@ function hud() {
   $('#hWarm').textContent = '🔥 ' + G.warmth; $('#hDust').textContent = '✨ ' + G.dust;
   const h = hourNow(), hh = Math.floor(h), mm = Math.floor((h - hh) * 60), mi = moonInfo(), ph = phaseOf(h);
   const met = meteorToday();
-  $('#hTime').textContent = (ph === 'night' ? mi.name.slice(0, 2) : ph === 'day' ? '☀️' : '🌅') + ' ' + String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0') + (G.timeMode !== 'real' ? '·体验' : '') + (met ? ' ☄️' : '');
+  $('#hTime').textContent = (ph === 'night' ? mi.name.slice(0, 2) : ph === 'day' ? '☀️' : '🌅') + ' ' + String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0') + (G.timeMode !== 'real' ? T('·体验', ' · preview') : '') + (met ? ' ☄️' : '');
   $('#bAuto').classList.toggle('on', G.autoOn);
 }
 setInterval(hud, 1000);
@@ -560,7 +585,7 @@ const reel = { on: false, f: null, t: 0, zone: [0, 0], speed: 1, rounds: 1 };
 function startReel() {
   const f = fishing.bite; reel.on = true; reel.f = f; reel.t = rand(0, 3); reel.rounds = f.legend ? 2 : 1;
   setZone(); $('#reel').classList.remove('hide');
-  $('#reelTxt').textContent = f.legend ? '✨ 传说鱼！连续两次点在绿色区域' : '鱼上钩了！在绿色区域点击';
+  $('#reelTxt').textContent = f.legend ? T('✨ 传说鱼！连续两次点在绿色区域', '✨ Legendary! Hit the green zone twice in a row') : T('鱼上钩了！在绿色区域点击', 'Fish on! Tap when the marker is in the green');
   requestAnimationFrame(reelTick);
 }
 function setZone() {
@@ -575,11 +600,11 @@ $('#reel').addEventListener('pointerdown', e => {
   const m = markPos();
   if (m >= reel.zone[0] && m <= reel.zone[1]) {
     sfx.tick();
-    if (--reel.rounds > 0) { setZone(); $('#reelTxt').textContent = '✨ 再一次！'; return; }
+    if (--reel.rounds > 0) { setZone(); $('#reelTxt').textContent = T('✨ 再一次！', '✨ Once more!'); return; }
     reel.on = false; $('#reel').classList.add('hide'); land(reel.f, false);
   } else {
     reel.on = false; $('#reel').classList.add('hide');
-    if (reel.f.legend) { fishing.st = 'gone'; fishing.t = 0; showToast(reel.f, '传说鱼挣脱了…', '星座的光还在，它还会再来', 2600); }
+    if (reel.f.legend) { fishing.st = 'gone'; fishing.t = 0; showToast(reel.f, T('传说鱼挣脱了…', 'The legendary fish slipped away…'), T('星座的光还在，它还会再来', 'The constellation still shines — it will come back'), 2600); }
     else escape();
   }
 });
@@ -589,7 +614,7 @@ function sceneXY(e) { const r = cv.getBoundingClientRect(); return [(e.clientX -
 cv.addEventListener('pointerdown', e => {
   sound.start();
   const [x, y] = sceneXY(e);
-  for (const s of fx.shoots) if (Math.hypot(s.x - x, s.y - y) < 14) { s.life = 0; G.dust += meteorToday() ? 3 : 2; sfx.chime(); showToast(null, '🌠 许了一个愿', `星屑 +${meteorToday() ? 3 : 2}`, 1800); hud(); return; }
+  for (const s of fx.shoots) if (Math.hypot(s.x - x, s.y - y) < 14) { s.life = 0; G.dust += meteorToday() ? 3 : 2; sfx.chime(); showToast(null, T('🌠 许了一个愿', '🌠 You made a wish'), T('星屑 +', 'Stardust +') + (meteorToday() ? 3 : 2), 1800); hud(); return; }
   if (fishing.st === 'bite' && !reel.on) { startReel(); return; }
   if (visitor && visitor.wait && Math.abs(x - (visitor.x + 5)) < 10 && y > 84) { giftVisitor(); return; }
   if (Math.abs(x - (scen.fireX - 18)) < 9 && y > 92 && y < 110) { dogHappy(); sfx.woof(); return; }
@@ -597,22 +622,23 @@ cv.addEventListener('pointerdown', e => {
   if (fishing.st === 'wait' && !G.autoOn) { fishing.wait = Math.min(fishing.wait, fishing.t + rand(1, 4)); }
 });
 const DECOR = [
-  { id: 'lantern', name: '露营灯', cost: 25, d: '一盏暖黄的灯，挂在帐篷边' },
-  { id: 'chair', name: '折叠椅', cost: 20, d: '坐在火边发呆专用' },
-  { id: 'lights', name: '彩色串灯', cost: 40, d: '从帐篷挂到营火旁' },
-  { id: 'scope', name: '小望远镜', cost: 60, d: '夜里每次钓到鱼额外 +1 星屑' },
-  { id: 'flowers', name: '野花丛', cost: 0, d: '狐狸送来的礼物', gift: true },
-  { id: 'chime', name: '风铃', cost: 0, d: '狐狸送来的礼物', gift: true }
+  { id: 'lantern', name: '露营灯', en: 'Camp Lantern', cost: 25, d: '一盏暖黄的灯，挂在帐篷边', dEn: 'A warm yellow lamp by the tent' },
+  { id: 'chair', name: '折叠椅', en: 'Folding Chair', cost: 20, d: '坐在火边发呆专用', dEn: 'For staring into the fire' },
+  { id: 'lights', name: '彩色串灯', en: 'String Lights', cost: 40, d: '从帐篷挂到营火旁', dEn: 'Strung from the tent to the fire' },
+  { id: 'scope', name: '小望远镜', en: 'Little Telescope', cost: 60, d: '夜里每次钓到鱼额外 +1 星屑', dEn: '+1 Stardust for every fish caught at night' },
+  { id: 'flowers', name: '野花丛', en: 'Wildflowers', cost: 0, d: '狐狸送来的礼物', dEn: 'A gift from the fox', gift: true },
+  { id: 'chime', name: '风铃', en: 'Wind Chime', cost: 0, d: '狐狸送来的礼物', dEn: 'A gift from the fox', gift: true }
 ];
+const POSTCARDS_EN = ['Thanks for the grilled fish! I planted these flowers next to your camp.', 'Smells great! Have this wind chime — it sings when the wind blows.', 'I’ll be back. The stars are lovely tonight, aren’t they?', 'I’m full! Your dog is so cute.'];
 const POSTCARDS = ['谢谢你的烤鱼！我把这些花种在你的营地旁边啦。', '好香！这个风铃送给你，风来的时候会唱歌。', '我会再来的。今晚的星星很漂亮，对吧？', '吃饱了！你的小狗很可爱。'];
 function giftVisitor() {
-  if (G.dishes <= 0) { showToast(null, '🦊 狐狸闻了闻……', '先在营火烤点鱼，再请它吃吧', 2400); return; }
+  if (G.dishes <= 0) { showToast(null, T('🦊 狐狸闻了闻……', '🦊 The fox sniffs around…'), T('先在营火烤点鱼，再请它吃吧', 'Grill some fish at the campfire first, then treat it'), 2400); return; }
   G.dishes--; G.gifts++;
   const gifts = DECOR.filter(d => d.gift && !G.decor.includes(d.id));
-  let msg = POSTCARDS[(G.gifts - 1) % POSTCARDS.length];
-  if (gifts.length) { G.decor.push(gifts[0].id); msg += `（获得装饰：${gifts[0].name}）`; } else { G.warmth += 8; msg += '（暖意 +8）'; }
+  let msg = T(POSTCARDS, POSTCARDS_EN)[(G.gifts - 1) % POSTCARDS.length];
+  if (gifts.length) { G.decor.push(gifts[0].id); msg += T(`（获得装饰：${gifts[0].name}）`, ` (New decoration: ${gifts[0].en})`); } else { G.warmth += 8; msg += T('（暖意 +8）', ' (Warmth +8)'); }
   visitor.wait = false; visitor.leaving = true; sfx.chime(); dogHappy();
-  showToast(null, '🦊 狐狸留下了一张明信片', msg, 4200); hud(); save();
+  showToast(null, T('🦊 狐狸留下了一张明信片', '🦊 The fox left you a postcard'), msg, 4200); hud(); save();
 }
 
 // ============================================================ panels
@@ -620,59 +646,66 @@ const panel = $('#panel'), card = $('#card');
 function closePanel() { panel.classList.add('hide'); }
 panel.addEventListener('pointerdown', e => { if (e.target === panel) closePanel(); });
 document.querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => { sound.start(); openPanel(b.dataset.p); }));
-$('#bAuto').onclick = () => { sound.start(); G.autoOn = !G.autoOn; hud(); save(); showToast(null, G.autoOn ? '🎣 挂机钓鱼：开' : '🎣 挂机钓鱼：关', G.autoOn ? '营地会自己钓鱼，你也可以随时手动收竿' : '只在你点击浮漂时收竿', 2000); };
-$('#bStrip').onclick = () => { G.strip = !G.strip; save(); layout(); showToast(null, G.strip ? '▭ 条状模式' : '▭ 完整模式', G.strip ? '把浏览器窗口缩小放到屏幕底部试试（桌面版会是真正的置顶小窗）' : '', 2600); };
+$('#bAuto').onclick = () => { sound.start(); G.autoOn = !G.autoOn; hud(); save(); showToast(null, G.autoOn ? T('🎣 挂机钓鱼：开', '🎣 Auto fishing: ON') : T('🎣 挂机钓鱼：关', '🎣 Auto fishing: OFF'), G.autoOn ? T('营地会自己钓鱼，你也可以随时手动收竿', 'The camp fishes on its own; you can still reel in by hand anytime') : T('只在你点击浮漂时收竿', 'Only reels in when you tap the bobber'), 2000); };
+$('#bLang').onclick = () => { G.lang = G.lang === 'en' ? 'zh' : 'en'; save(); applyLang(); hud(); };
+$('#bStrip').onclick = () => { G.strip = !G.strip; save(); layout(); showToast(null, G.strip ? T('▭ 条状模式', '▭ Strip mode') : T('▭ 完整模式', '▭ Full mode'), G.strip ? T('把浏览器窗口缩小放到屏幕底部试试（桌面版会是真正的置顶小窗）', 'Try shrinking your browser window to the bottom of the screen (the desktop version will be a real always-on-top strip)') : '', 2600); };
 function head(t, sub) { return `<h2>${t}<button onclick="document.querySelector('#panel').classList.add('hide')">✕</button></h2>${sub ? `<div class="sub">${sub}</div>` : ''}`; }
 function openPanel(p, arg) {
   let h = '';
+  const ok = T('好', 'OK');
   if (p === 'cook') {
     const ids = Object.keys(G.fish).filter(k => G.fish[k] > 0);
-    h = head('🍳 营火烹饪', `把鱼烤成料理，获得暖意 🔥（用来升级和买装饰）。料理也可以送给来访的狐狸。<br>库存料理：<b>${G.dishes}</b> 份`);
-    if (!ids.length) h += `<div class="msg">还没有鱼呢。<br>等等浮漂，或者点它亲手收竿吧。</div>`;
-    else { h += `<div class="row"><div class="grow"><b>全部烤掉</b><small>共 ${ids.reduce((a, k) => a + G.fish[k], 0)} 条，暖意 +${ids.reduce((a, k) => a + G.fish[k] * FM[k].v, 0)}</small></div><button class="btn" data-cook="all">🔥 烤</button></div>`; for (const k of ids) h += `<div class="row"><img class="fish" src="${fishSprite(FM[k])}"><div class="grow"><b>${FM[k].name}</b> ×${G.fish[k]}<small>每条 ${FM[k].v} 🔥</small></div><button class="btn" data-cook="${k}">烤一条</button></div>`; }
-    h += `<h2 style="margin-top:12px;font-size:15px">升级 <span style="font-size:12px">暖意 🔥 ${G.warmth}</span></h2>`;
-    const UP = [['rod', '鱼竿', '收竿时绿色区域更宽'], ['bait', '鱼饵', '鱼更快上钩'], ['auto', '自动渔具', '挂机时更容易钓到']];
-    for (const [k, n, d] of UP) { const lv = G.up[k], cost = 15 + lv * 20; h += `<div class="row"><div class="grow"><b>${n} Lv.${lv}</b><small>${d}</small></div>${lv >= 5 ? '<button class="btn" disabled>满级</button>' : `<button class="btn" data-up="${k}" ${G.warmth < cost ? 'disabled' : ''}>${cost} 🔥</button>`}</div>`; }
-    h += `<h2 style="margin-top:12px;font-size:15px">营地装饰</h2>`;
-    for (const d of DECOR) { const own = G.decor.includes(d.id); h += `<div class="row"><div class="grow"><b>${d.name}</b><small>${d.d}</small></div>${own ? '<button class="btn" disabled>已摆放</button>' : d.gift ? '<button class="btn alt" disabled>访客赠送</button>' : `<button class="btn" data-dec="${d.id}" ${G.warmth < d.cost ? 'disabled' : ''}>${d.cost} 🔥</button>`}</div>`; }
+    h = head(T('🍳 营火烹饪', '🍳 Campfire Cooking'), T(`把鱼烤成料理，获得暖意 🔥（用来升级和买装饰）。料理也可以送给来访的狐狸。<br>库存料理：<b>${G.dishes}</b> 份`, `Grill fish into dishes to earn Warmth 🔥 (spend it on upgrades and decorations). Dishes can also be gifted to the visiting fox.<br>Dishes in stock: <b>${G.dishes}</b>`));
+    if (!ids.length) h += `<div class="msg">${T('还没有鱼呢。<br>等等浮漂，或者点它亲手收竿吧。', 'No fish yet.<br>Wait for the bobber, or tap it to reel one in yourself.')}</div>`;
+    else {
+      const n = ids.reduce((a, k) => a + G.fish[k], 0), w = ids.reduce((a, k) => a + G.fish[k] * FM[k].v, 0);
+      h += `<div class="row"><div class="grow"><b>${T('全部烤掉', 'Grill everything')}</b><small>${T(`共 ${n} 条，暖意 +${w}`, `${n} fish · Warmth +${w}`)}</small></div><button class="btn" data-cook="all">${T('🔥 烤', '🔥 Grill')}</button></div>`;
+      for (const k of ids) h += `<div class="row"><img class="fish" src="${fishSprite(FM[k])}"><div class="grow"><b>${fname(FM[k])}</b> ×${G.fish[k]}<small>${T(`每条 ${FM[k].v} 🔥`, `${FM[k].v} 🔥 each`)}</small></div><button class="btn" data-cook="${k}">${T('烤一条', 'Grill one')}</button></div>`;
+    }
+    h += `<h2 style="margin-top:12px;font-size:15px">${T('升级', 'Upgrades')} <span style="font-size:12px">${T('暖意', 'Warmth')} 🔥 ${G.warmth}</span></h2>`;
+    const UP = [['rod', T('鱼竿', 'Fishing Rod'), T('收竿时绿色区域更宽', 'Wider green zone when reeling')], ['bait', T('鱼饵', 'Bait'), T('鱼更快上钩', 'Fish bite sooner')], ['auto', T('自动渔具', 'Auto Gear'), T('挂机时更容易钓到', 'Better catch rate while idle')]];
+    for (const [k, n, d] of UP) { const lv = G.up[k], cost = 15 + lv * 20; h += `<div class="row"><div class="grow"><b>${n} Lv.${lv}</b><small>${d}</small></div>${lv >= 5 ? `<button class="btn" disabled>${T('满级', 'Max')}</button>` : `<button class="btn" data-up="${k}" ${G.warmth < cost ? 'disabled' : ''}>${cost} 🔥</button>`}</div>`; }
+    h += `<h2 style="margin-top:12px;font-size:15px">${T('营地装饰', 'Camp Decorations')}</h2>`;
+    for (const d of DECOR) { const own = G.decor.includes(d.id); h += `<div class="row"><div class="grow"><b>${T(d.name, d.en)}</b><small>${T(d.d, d.dEn)}</small></div>${own ? `<button class="btn" disabled>${T('已摆放', 'Placed')}</button>` : d.gift ? `<button class="btn alt" disabled>${T('访客赠送', 'Gift only')}</button>` : `<button class="btn" data-dec="${d.id}" ${G.warmth < d.cost ? 'disabled' : ''}>${d.cost} 🔥</button>`}</div>`; }
   } else if (p === 'star') {
     const vis = visibleCons(), h0 = hourNow(), nf = nightFactor(h0), met = meteorToday();
-    h = head('✨ 星图', `今晚的季节星座会出现在真实的夜空方位。夜里钓到的鱼会带回<b>星屑</b>；点亮一整座星座，它的守护传说鱼就会来找你。<br>星屑 ✨ <b>${G.dust}</b> · ${moonInfo().name} · ${met ? '☄️ 今晚有' + met + '流星雨！' : '下一场：' + nextMeteor()}`);
-    if (nf < .5) h += `<div class="sub">☀️ 现在是${PHASE_CN[phaseOf(h0)]}，天黑后才能看到星座（可在 ⚙ 里切换「体验夜晚」）。</div>`;
+    h = head(T('✨ 星图', '✨ Star Map'), T(`今晚的季节星座会出现在真实的夜空方位。夜里钓到的鱼会带回<b>星屑</b>；点亮一整座星座，它的守护传说鱼就会来找你。<br>星屑 ✨ <b>${G.dust}</b> · ${moonInfo().name} · ${met ? '☄️ 今晚有' + mname(met) + '流星雨！' : '下一场：' + nextMeteor()}`, `Tonight's seasonal constellations appear in the real night sky. Fish caught at night bring back <b>Stardust</b>; light up a whole constellation and its legendary guardian fish will come to you.<br>Stardust ✨ <b>${G.dust}</b> · ${moonInfo().name} · ${met ? '☄️ ' + mname(met) + ' meteor shower tonight!' : 'Next: ' + nextMeteor()}`));
+    if (nf < .5) h += `<div class="sub">${T(`☀️ 现在是${phaseName(phaseOf(h0))}，天黑后才能看到星座（可在 ⚙ 里切换「体验夜晚」）。`, `☀️ It's ${phaseName(phaseOf(h0))} now — constellations appear after dark (or switch to "Preview: Night" in ⚙).`)}</div>`;
     for (const k of vis) {
       const C = CONS[k], lit = G.lit[k] || 0, n = C.s.length, done = G.done.includes(k), sum = G.summon === k;
       const dots = Array.from({ length: n }, (_, i) => i < lit || done ? '<b>★</b>' : '☆').join('');
-      h += `<div class="row"><img class="fish ${G.book['L_' + k] ? '' : 'q'}" src="${fishSprite(FM['L_' + k])}"><div class="grow"><b>${C.name}</b> <span class="dots">${dots}</span><small>${done ? '已完成 · 守护者：' + LEGEND[k].name : sum ? '🌟 召唤中！去湖边等它上钩' : '守护者：？？？'}</small></div>${done || sum ? '' : lit >= n ? `<button class="btn" data-sum="${k}">🌟 召唤</button>` : `<button class="btn" data-lit="${k}" ${G.dust < consCost() ? 'disabled' : ''}>点亮 ✨${consCost()}</button>`}</div>`;
+      h += `<div class="row"><img class="fish ${G.book['L_' + k] ? '' : 'q'}" src="${fishSprite(FM['L_' + k])}"><div class="grow"><b>${cname(k)}</b> <span class="dots">${dots}</span><small>${done ? T('已完成 · 守护者：', 'Complete · Guardian: ') + fname(FM['L_' + k]) : sum ? T('🌟 召唤中！去湖边等它上钩', '🌟 Summoning! Wait by the lake for it to bite') : T('守护者：？？？', 'Guardian: ???')}</small></div>${done || sum ? '' : lit >= n ? `<button class="btn" data-sum="${k}">${T('🌟 召唤', '🌟 Summon')}</button>` : `<button class="btn" data-lit="${k}" ${G.dust < consCost() ? 'disabled' : ''}>${T('点亮', 'Light')} ✨${consCost()}</button>`}</div>`;
     }
-    h += `<div class="sub" style="margin-top:8px">点击夜空中的流星可以许愿，获得星屑。真实流星雨的日子，湖里会出现「流星鱼」。</div>`;
+    h += `<div class="sub" style="margin-top:8px">${T('点击夜空中的流星可以许愿，获得星屑。真实流星雨的日子，湖里会出现「流星鱼」。', 'Tap a shooting star to make a wish and earn Stardust. On real meteor-shower dates, "Meteor Fish" appear in the lake.')}</div>`;
   } else if (p === 'book') {
     const got = FISH.filter(f => G.book[f.id]).length;
-    h = head('📖 钓鱼手帐', `已发现 <b>${got}</b> / ${FISH.length} 种 · 总共钓起 ${G.catches} 次`);
+    h = head(T('📖 钓鱼手帐', '📖 Fishing Journal'), T(`已发现 <b>${got}</b> / ${FISH.length} 种 · 总共钓起 ${G.catches} 次`, `Discovered <b>${got}</b> / ${FISH.length} species · ${G.catches} catches in total`));
     h += '<div class="grid">';
-    for (const f of FISH) { const b = G.book[f.id]; h += b ? `<div class="cell"><img src="${fishSprite(f)}"><br><b>${f.name}</b><br>×${b.n} · ${b.first}<br><span style="color:#7a6a7d">${f.note}</span></div>` : `<div class="cell unk"><img src="${fishSprite(f)}" style="filter:brightness(0) opacity(.2)"><br>？？？<br>${hintOf(f)}</div>`; }
+    for (const f of FISH) { const b = G.book[f.id]; h += b ? `<div class="cell"><img src="${fishSprite(f)}"><br><b>${fname(f)}</b><br>×${b.n} · ${b.first}<br><span style="color:#7a6a7d">${fnote(f)}</span></div>` : `<div class="cell unk"><img src="${fishSprite(f)}" style="filter:brightness(0) opacity(.2)"><br>???<br>${hintOf(f)}</div>`; }
     h += '</div>';
   } else if (p === 'focus') {
-    h = head('⏳ 专注时光', '开始专注后，营火会烧得更旺，营地帮你继续钓鱼、上钩更快。结束时会收到一份「专注渔获」。<br>（Beta：关掉页面计时也会继续，回来就能领取）');
-    if (focus.on) h += `<div class="msg">专注中… 剩余 ${$('#focusChip').textContent.replace('⏳ ', '')}</div><div class="center"><button class="btn alt" id="fStop">提前结束（无奖励）</button></div>`;
-    else h += `<div class="center" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn big" data-focus="25">🍅 25 分钟</button><button class="btn big" data-focus="45">🌲 45 分钟</button><button class="btn big alt" data-focus="5">☕ 5 分钟</button></div>`;
+    h = head(T('⏳ 专注时光', '⏳ Focus Time'), T('开始专注后，营火会烧得更旺，营地帮你继续钓鱼、上钩更快。结束时会收到一份「专注渔获」。<br>（Beta：关掉页面计时也会继续，回来就能领取）', 'While you focus, the campfire burns brighter and the camp keeps fishing for you, with faster bites. When time is up you get a "Focus Catch".<br>(Beta: the timer keeps running even if you close the page — come back to claim it.)'));
+    if (focus.on) h += `<div class="msg">${T('专注中… 剩余', 'Focusing… remaining')} ${$('#focusChip').textContent.replace('⏳ ', '')}</div><div class="center"><button class="btn alt" id="fStop">${T('提前结束（无奖励）', 'Stop early (no reward)')}</button></div>`;
+    else h += `<div class="center" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn big" data-focus="25">🍅 ${T('25 分钟', '25 min')}</button><button class="btn big" data-focus="45">🌲 ${T('45 分钟', '45 min')}</button><button class="btn big alt" data-focus="5">☕ ${T('5 分钟', '5 min')}</button></div>`;
   } else if (p === 'focusDone') {
-    h = head('🎉 专注完成！', '辛苦了。站起来伸个懒腰吧。') + `<div class="row"><img class="fish" src="${fishSprite(arg)}"><div class="grow"><b>专注渔获：${arg.name}</b><small>另得 ✨ 星屑 +3 · 🔥 暖意 +${focus.len}</small></div></div><div class="center" style="margin-top:8px"><button class="btn big" onclick="document.querySelector('#panel').classList.add('hide')">好</button></div>`;
+    h = head(T('🎉 专注完成！', '🎉 Focus complete!'), T('辛苦了。站起来伸个懒腰吧。', 'Nice work. Stand up and have a good stretch.')) + `<div class="row"><img class="fish" src="${fishSprite(arg)}"><div class="grow"><b>${T('专注渔获：', 'Focus Catch: ')}${fname(arg)}</b><small>${T(`另得 ✨ 星屑 +3 · 🔥 暖意 +${focus.len}`, `Also ✨ Stardust +3 · 🔥 Warmth +${focus.len}`)}</small></div></div><div class="center" style="margin-top:8px"><button class="btn big" onclick="document.querySelector('#panel').classList.add('hide')">${ok}</button></div>`;
   } else if (p === 'worry') {
-    h = head('📝 营火烧烦恼', '写下一件让你烦心的事，然后把它丢进营火。<b>文字只在你这台设备上，不会保存、不会上传。</b>') + `<textarea id="wText" maxlength="60" placeholder="比如：明天的汇报好紧张……"></textarea><div class="center"><button class="btn big" id="wBurn">🔥 丢进营火</button></div>`;
+    h = head(T('📝 营火烧烦恼', '📝 Burn Your Worries'), T('写下一件让你烦心的事，然后把它丢进营火。<b>文字只在你这台设备上，不会保存、不会上传。</b>', 'Write down something that is bothering you, then toss it into the campfire. <b>Your words stay on this device — never saved, never uploaded.</b>')) + `<textarea id="wText" maxlength="60" placeholder="${T('比如：明天的汇报好紧张……', 'e.g. Nervous about tomorrow’s presentation…')}"></textarea><div class="center"><button class="btn big" id="wBurn">${T('🔥 丢进营火', '🔥 Into the fire')}</button></div>`;
   } else if (p === 'worryDone') {
-    h = head('🔥', '') + `<div class="msg">${arg}</div><div class="center"><button class="btn big" onclick="document.querySelector('#panel').classList.add('hide')">嗯</button></div>`;
+    h = head('🔥', '') + `<div class="msg">${arg}</div><div class="center"><button class="btn big" onclick="document.querySelector('#panel').classList.add('hide')">${T('嗯', 'Okay')}</button></div>`;
   } else if (p === 'sound') {
-    h = head('🎧 声音混音台', '像白噪音 App 一样，分别调节每种声音。打开「雨声」时湖面会下雨，还会出现只在雨天出没的鱼。');
-    const L = [['fire', '🔥 营火噼啪'], ['wave', '🌊 湖水'], ['bug', '🦗 虫鸣（夜晚）'], ['rain', '🌧 雨声'], ['music', '🎷 Lofi 爵士']];
-    for (const [k, n] of L) h += `<div class="row"><div style="width:120px">${n}</div><div class="grow"><input type="range" min="0" max="1" step=".05" value="${G.vol[k]}" data-vol="${k}"></div></div>`;
+    h = head(T('🎧 声音混音台', '🎧 Sound Mixer'), T('像白噪音 App 一样，分别调节每种声音。打开「雨声」时湖面会下雨，还会出现只在雨天出没的鱼。', 'Like a white-noise app — mix each sound on its own. Turn on "Rain" and it will rain on the lake, bringing out fish that only appear in the rain.'));
+    const L = [['fire', T('🔥 营火噼啪', '🔥 Crackling fire')], ['wave', T('🌊 湖水', '🌊 Lake water')], ['bug', T('🦗 虫鸣（夜晚）', '🦗 Crickets (night)')], ['rain', T('🌧 雨声', '🌧 Rain')], ['music', T('🎷 Lofi 爵士', '🎷 Lofi jazz')]];
+    for (const [k, n] of L) h += `<div class="row"><div style="width:130px">${n}</div><div class="grow"><input type="range" min="0" max="1" step=".05" value="${G.vol[k]}" data-vol="${k}"></div></div>`;
   } else if (p === 'set') {
-    h = head('⚙ 设置 · Beta v0.1.1', '这是测试版：玩法、数值和存档可能会在后续版本中调整或重置。');
-    h += `<div class="row"><div class="grow"><b>时间</b><small>默认跟随你的真实时间；白天测试时可以切到夜晚看星空</small></div><select id="sTime"><option value="real">跟随真实时间</option><option value="day">体验：白天</option><option value="dusk">体验：黄昏</option><option value="night">体验：夜晚</option></select></div>`;
-    h += `<div class="row"><div class="grow"><b>预览流星雨</b><small>真实的流星雨日期会自动开启；下一场：${nextMeteor()}</small></div><button class="btn ${G.meteorPreview ? '' : 'alt'}" id="sMet">${G.meteorPreview ? '开' : '关'}</button></div>`;
-    h += `<div class="row"><div class="grow"><b>重置存档</b><small>清空所有进度，从头开始</small></div><button class="btn alt" id="sReset">重置</button></div>`;
-    h += `<div class="sub" style="margin-top:8px">💬 有想法或发现 Bug？欢迎到 <a style="color:#c8642a" href="https://github.com/wilsonmah/star-bait-camp/issues" target="_blank" rel="noopener">GitHub Issues</a> 留言。<br>© 2026 wilsonmah 版权所有 · All Rights Reserved</div>`;
+    h = head(T('⚙ 设置 · Beta v0.1.2', '⚙ Settings · Beta v0.1.2'), T('这是测试版：玩法、数值和存档可能会在后续版本中调整或重置。', 'This is a beta: gameplay, balance and save data may change or be reset in future versions.'));
+    h += `<div class="row"><div class="grow"><b>${T('语言 Language', 'Language 语言')}</b><small>${T('界面、鱼和星座名称都会切换', 'Switches the interface, fish and constellation names')}</small></div><select id="sLang"><option value="zh">简体中文</option><option value="en">English</option></select></div>`;
+    h += `<div class="row"><div class="grow"><b>${T('时间', 'Time')}</b><small>${T('默认跟随你的真实时间；白天测试时可以切到夜晚看星空', 'Follows your real clock by default; switch to night to see the stars during the day')}</small></div><select id="sTime"><option value="real">${T('跟随真实时间', 'Real time')}</option><option value="day">${T('体验：白天', 'Preview: Day')}</option><option value="dusk">${T('体验：黄昏', 'Preview: Dusk')}</option><option value="night">${T('体验：夜晚', 'Preview: Night')}</option></select></div>`;
+    h += `<div class="row"><div class="grow"><b>${T('预览流星雨', 'Preview meteor shower')}</b><small>${T('真实的流星雨日期会自动开启；下一场：', 'Turns on automatically on real meteor-shower dates. Next: ')}${nextMeteor()}</small></div><button class="btn ${G.meteorPreview ? '' : 'alt'}" id="sMet">${G.meteorPreview ? T('开', 'On') : T('关', 'Off')}</button></div>`;
+    h += `<div class="row"><div class="grow"><b>${T('重置存档', 'Reset save')}</b><small>${T('清空所有进度，从头开始', 'Erase all progress and start over')}</small></div><button class="btn alt" id="sReset">${T('重置', 'Reset')}</button></div>`;
+    h += `<div class="sub" style="margin-top:8px">${T('💬 有想法或发现 Bug？欢迎到 ', '💬 Ideas or bugs? Leave a note on ')}<a style="color:#c8642a" href="https://github.com/wilsonmah/star-bait-camp/issues" target="_blank" rel="noopener">GitHub Issues</a>${T(' 留言。', '.')}<br>© 2026 wilsonmah ${T('版权所有 · ', '· ')}All Rights Reserved</div>`;
   } else if (p === 'welcome') {
-    h = head('⛺ 欢迎回来', '') + `<div class="msg">${arg}</div><div class="center"><button class="btn big" onclick="document.querySelector('#panel').classList.add('hide')">去看看</button></div>`;
+    h = head(T('⛺ 欢迎回来', '⛺ Welcome back'), '') + `<div class="msg">${arg}</div><div class="center"><button class="btn big" onclick="document.querySelector('#panel').classList.add('hide')">${T('去看看', 'Take a look')}</button></div>`;
   }
   card.innerHTML = h; panel.classList.remove('hide');
   // bindings
@@ -680,23 +713,24 @@ function openPanel(p, arg) {
   card.querySelectorAll('[data-up]').forEach(b => b.onclick = () => { const k = b.dataset.up, cost = 15 + G.up[k] * 20; if (G.warmth < cost) return; G.warmth -= cost; G.up[k]++; sfx.chime(); hud(); save(); openPanel('cook'); });
   card.querySelectorAll('[data-dec]').forEach(b => b.onclick = () => { const d = DECOR.find(x => x.id === b.dataset.dec); if (G.warmth < d.cost) return; G.warmth -= d.cost; G.decor.push(d.id); sfx.chime(); hud(); save(); openPanel('cook'); });
   card.querySelectorAll('[data-lit]').forEach(b => b.onclick = () => { const k = b.dataset.lit; if (G.dust < consCost()) return; G.dust -= consCost(); G.lit[k] = (G.lit[k] || 0) + 1; sfx.twinkle(); hud(); save(); openPanel('star'); });
-  card.querySelectorAll('[data-sum]').forEach(b => b.onclick = () => { const k = b.dataset.sum; G.summon = k; flash = .8; sfx.legend(); save(); closePanel(); showToast(FM['L_' + k], `🌟 ${CONS[k].name} 亮起来了！`, `${LEGEND[k].name}正在靠近湖边……下一次上钩的就是它`, 4200); if (fishing.st === 'wait') fishing.wait = Math.min(fishing.wait, fishing.t + 4); });
+  card.querySelectorAll('[data-sum]').forEach(b => b.onclick = () => { const k = b.dataset.sum; G.summon = k; flash = .8; sfx.legend(); save(); closePanel(); showToast(FM['L_' + k], T(`🌟 ${cname(k)} 亮起来了！`, `🌟 ${cname(k)} is shining!`), T(`${fname(FM['L_' + k])}正在靠近湖边……下一次上钩的就是它`, `The ${fname(FM['L_' + k])} is drawing near… it will be your next bite`), 4200); if (fishing.st === 'wait') fishing.wait = Math.min(fishing.wait, fishing.t + 4); });
   card.querySelectorAll('[data-focus]').forEach(b => b.onclick = () => startFocus(+b.dataset.focus));
   const fs = card.querySelector('#fStop'); if (fs) fs.onclick = () => { endFocus(false); closePanel(); };
-  const wb = card.querySelector('#wBurn'); if (wb) wb.onclick = () => { const v = card.querySelector('#wText').value.trim(); if (!v) { card.querySelector('#wText').focus(); return; } fx.burn = { t: 0 }; sfx.whoosh(); G.warmth += 1; hud(); setTimeout(() => openPanel('worryDone', pick(COMFORT)), 1400); closePanel(); };
+  const wb = card.querySelector('#wBurn'); if (wb) wb.onclick = () => { const v = card.querySelector('#wText').value.trim(); if (!v) { card.querySelector('#wText').focus(); return; } fx.burn = { t: 0 }; sfx.whoosh(); G.warmth += 1; hud(); setTimeout(() => openPanel('worryDone', pick(T(COMFORT, COMFORT_EN))), 1400); closePanel(); };
   card.querySelectorAll('[data-vol]').forEach(r => r.oninput = () => { G.vol[r.dataset.vol] = +r.value; save(); });
+  const sl = card.querySelector('#sLang'); if (sl) { sl.value = G.lang; sl.onchange = () => { G.lang = sl.value; save(); applyLang(); hud(); openPanel('set'); }; }
   const st = card.querySelector('#sTime'); if (st) { st.value = G.timeMode; st.onchange = () => { G.timeMode = st.value; save(); hud(); }; }
   const sm = card.querySelector('#sMet'); if (sm) sm.onclick = () => { G.meteorPreview = !G.meteorPreview; save(); hud(); openPanel('set'); };
-  const sr = card.querySelector('#sReset'); if (sr) sr.onclick = () => { if (confirm('确定要清空所有进度吗？')) { localStorage.removeItem(SAVE_KEY); location.reload(); } };
+  const sr = card.querySelector('#sReset'); if (sr) sr.onclick = () => { if (confirm(T('确定要清空所有进度吗？', 'Erase all progress?'))) { localStorage.removeItem(SAVE_KEY); location.reload(); } };
 }
 function hintOf(f) {
-  if (f.legend) return `点亮${CONS[f.legend].name}`;
-  if (f.junk) return '湖里偶尔会捞到';
-  if (f.meteor) return '流星雨之夜';
-  if (f.moon) return f.moon === 'full' ? '满月夜' : '新月夜';
-  if (f.rain) return '下雨的时候';
-  if (f.season) return { spring: '春天', summer: '夏天', autumn: '秋天', winter: '冬天' }[f.season] + '限定';
-  return f.t === 'any' ? '随时' : f.t.split(',').map(t => PHASE_CN[t]).join('/');
+  if (f.legend) return T(`点亮${cname(f.legend)}`, `Light up ${cname(f.legend)}`);
+  if (f.junk) return T('湖里偶尔会捞到', 'Sometimes found in the lake');
+  if (f.meteor) return T('流星雨之夜', 'Meteor-shower nights');
+  if (f.moon) return f.moon === 'full' ? T('满月夜', 'Full-moon nights') : T('新月夜', 'New-moon nights');
+  if (f.rain) return T('下雨的时候', 'When it rains');
+  if (f.season) return T({ spring: '春天', summer: '夏天', autumn: '秋天', winter: '冬天' }[f.season] + '限定', { spring: 'Spring', summer: 'Summer', autumn: 'Autumn', winter: 'Winter' }[f.season] + ' only');
+  return f.t === 'any' ? T('随时', 'Anytime') : f.t.split(',').map(t => phaseName(t)).join('/');
 }
 
 // ============================================================ sound (all synthesized)
@@ -819,8 +853,21 @@ const sfx = {
   woof: () => { sound.tone(420, .08, 'square', .04, -120); sound.tone(380, .1, 'square', .04, -140, .12); }
 };
 
+// ============================================================ language
+const UI = { auto: ['挂机钓鱼', 'Auto Fish'], cook: ['营火烹饪', 'Campfire'], star: ['星图', 'Star Map'], book: ['手帐', 'Journal'], focus: ['专注', 'Focus'], worry: ['烧烦恼', 'Burn Worries'], sound: ['声音', 'Sound'], strip: ['条状模式', 'Strip Mode'], set: ['设置', 'Settings'], lang: ['English', '中文'] };
+function applyLang() {
+  document.documentElement.lang = T('zh-CN', 'en');
+  document.title = T('钓星营地 Star Bait Camp · Beta', 'Star Bait Camp · Beta');
+  document.querySelectorAll('[data-k]').forEach(e => { e.textContent = T(UI[e.dataset.k][0], UI[e.dataset.k][1]); });
+  $('#reelNote').textContent = T('点击屏幕任意处收竿', 'Tap anywhere to reel in');
+  $('#intro').innerHTML = T(
+    '<b style="color:#ffe9a8;font-size:15px">钓星营地 · Star Bait Camp</b><br>屏幕底部的小营地陪你工作；今晚真实的星空，决定你钓到什么。<br><span style="opacity:.75">这是 <b>Beta 测试版 v0.1.2</b>：玩法和存档随时可能调整。点「⚙」可以切换夜晚、预览流星雨。<br>点湖面上的浮漂收竿 · 挂机也会自动钓鱼 · 传说鱼需要亲手拉上来</span><br><span style="opacity:.5;font-size:11px">© 2026 wilsonmah 版权所有 · <a href="https://github.com/wilsonmah/star-bait-camp/issues" target="_blank" rel="noopener">反馈建议</a></span>',
+    '<b style="color:#ffe9a8;font-size:15px">Star Bait Camp · 钓星营地</b><br>A tiny camp at the bottom of your screen keeps you company — tonight’s real sky decides what you catch.<br><span style="opacity:.75">This is <b>Beta v0.1.2</b>: gameplay and saves may change anytime. Open “⚙” to switch to night or preview a meteor shower.<br>Tap the bobber to reel in · The camp also fishes on its own · Legendary fish must be landed by hand</span><br><span style="opacity:.5;font-size:11px">© 2026 wilsonmah · All Rights Reserved · <a href="https://github.com/wilsonmah/star-bait-camp/issues" target="_blank" rel="noopener">Feedback</a></span>');
+  layout();
+}
+
 // ============================================================ boot
-layout(); castLine(); hud();
+applyLang(); castLine(); hud();
 // offline progress
 (() => {
   const away = Math.min(8 * 3600, (Date.now() - (G.lastSeen || Date.now())) / 1000);
@@ -828,11 +875,11 @@ layout(); castLine(); hud();
     const n = Math.min(40, Math.floor(away / 90 * (.4 + G.up.auto * .06)));
     if (n > 0) {
       const got = {};
-      for (let i = 0; i < n; i++) { const f = FISH.filter(f => !f.legend && !f.junk && f.t === 'any' && !f.season && !f.rain)[Math.floor(Math.random() * 2)]; G.fish[f.id] = (G.fish[f.id] || 0) + 1; got[f.name] = (got[f.name] || 0) + 1; }
+      for (let i = 0; i < n; i++) { const f = FISH.filter(f => !f.legend && !f.junk && f.t === 'any' && !f.season && !f.rain)[Math.floor(Math.random() * 2)]; G.fish[f.id] = (G.fish[f.id] || 0) + 1; got[fname(f)] = (got[fname(f)] || 0) + 1; }
       save();
-      setTimeout(() => openPanel('welcome', `你离开了 ${Math.round(away / 60)} 分钟。<br>小营地替你钓到了：<br><b>${Object.entries(got).map(([k, v]) => k + ' ×' + v).join('、')}</b><br>营火一直帮你留着。`), 600);
+      setTimeout(() => openPanel('welcome', T(`你离开了 ${Math.round(away / 60)} 分钟。<br>小营地替你钓到了：<br><b>${Object.entries(got).map(([k, v]) => k + ' ×' + v).join('、')}</b><br>营火一直帮你留着。`, `You were away for ${Math.round(away / 60)} minutes.<br>The little camp caught these for you:<br><b>${Object.entries(got).map(([k, v]) => k + ' ×' + v).join(', ')}</b><br>The campfire kept burning while you were gone.`)), 600);
     }
-  } else if (!G.catches) setTimeout(() => showToast(null, '⛺ 欢迎来到钓星营地（Beta）', '挂机会自动钓鱼；看到浮漂上的「!」就点它亲手收竿', 5200), 800);
+  } else if (!G.catches) setTimeout(() => showToast(null, T('⛺ 欢迎来到钓星营地（Beta）', '⛺ Welcome to Star Bait Camp (Beta)'), T('挂机会自动钓鱼；看到浮漂上的「!」就点它亲手收竿', 'The camp fishes on its own; when you see “!” on the bobber, tap it to reel in yourself'), 5200), 800);
 })();
 requestAnimationFrame(frame);
 addEventListener('pagehide', save);
