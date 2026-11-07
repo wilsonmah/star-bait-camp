@@ -14,105 +14,124 @@
 <title>钓星营地 Star Bait Camp · Beta</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--ink:#2b2233;--paper:#fbf1dc;--paper2:#f2e2c0;--fire:#ff9a3c;--star:#ffe9a8;--night:#0b1026}
-html,body{height:100%;background:var(--night);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+:root{--ink:#2b2233;--paper:#fbf3df;--paper2:#f3e6c8;--amber:#ffcf6b;--night:#0b1026;--glass:rgba(16,14,36,.62);--line:rgba(255,233,168,.22)}
+html,body{height:100%;background:var(--night);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;overflow:hidden;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
 #app{position:fixed;inset:0;display:flex;flex-direction:column;justify-content:flex-end}
 #sceneWrap{position:relative;flex:none;width:100%;overflow:hidden}
-#cv{display:block;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;cursor:pointer}
-#below{flex:1;background:linear-gradient(#141a36,#0b1026);display:flex;align-items:flex-start;justify-content:center;padding:14px 16px;color:#cfd6ff;font-size:13px;line-height:1.7;text-align:center;overflow:auto}
+#cv{display:block;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;cursor:pointer;touch-action:none}
+#below{flex:1;background:linear-gradient(#141a36,#0b1026);display:flex;align-items:flex-start;justify-content:center;padding:14px 18px;color:#b8bfe8;font-size:13px;line-height:1.75;text-align:center;overflow:auto}
 body.strip #below{display:none}
-.beta{position:absolute;left:8px;top:calc(env(safe-area-inset-top) + 8px);background:#ff5a7a;color:#fff;font-weight:900;font-size:11px;letter-spacing:1px;padding:3px 7px;border:2px solid #2b2233;box-shadow:2px 2px 0 #2b2233;z-index:5;pointer-events:none}
-.hud{position:absolute;right:8px;top:calc(env(safe-area-inset-top) + 8px);display:flex;gap:6px;z-index:5;pointer-events:none;flex-wrap:wrap;justify-content:flex-end}
-.chip{background:rgba(251,241,220,.92);border:2px solid var(--ink);box-shadow:2px 2px 0 var(--ink);padding:2px 7px;font-size:12px;font-weight:800;white-space:nowrap}
-#focusChip{display:none;background:#ffcf6b}
-.bar{position:relative;flex:none;display:flex;gap:6px;padding:8px 8px calc(env(safe-area-inset-bottom) + 8px);background:#2b2233;overflow-x:auto;scrollbar-width:none;justify-content:flex-start}
-.bar::-webkit-scrollbar{display:none}
-.bar>.tb:first-child{margin-left:auto}.bar>.tb:last-child{margin-right:auto}
-.tb{flex:none;appearance:none;border:2px solid #120d17;background:var(--paper);color:var(--ink);font:inherit;font-size:12px;font-weight:800;padding:6px 9px;box-shadow:0 3px 0 #120d17;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap}
-.tb:active{transform:translateY(2px);box-shadow:0 1px 0 #120d17}
-.tb.on{background:#ffcf6b}
-.tb i{font-style:normal;font-size:15px}
+.hudL{position:absolute;left:10px;top:calc(env(safe-area-inset-top) + 10px);z-index:5;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.campchip{pointer-events:auto;cursor:pointer;min-width:122px;max-width:190px;background:var(--glass);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;padding:6px 10px 7px;color:#ffe9a8;font-size:12px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.28)}
+.campchip .nm{display:flex;justify-content:space-between;gap:8px;white-space:nowrap;overflow:hidden}
+.campchip .nm span{overflow:hidden;text-overflow:ellipsis}
+.campchip .nm b{color:#fff;font-weight:800}
+.campchip .xp{height:4px;border-radius:3px;background:rgba(255,255,255,.18);margin-top:5px;overflow:hidden}
+.campchip .xp i{display:block;height:100%;background:linear-gradient(90deg,#ffcf6b,#ff9a5a);border-radius:3px}
+.beta{background:linear-gradient(135deg,#ff6a8a,#ff4a6a);color:#fff;font-weight:900;font-size:10px;letter-spacing:.8px;padding:2px 8px;border-radius:999px;box-shadow:0 2px 8px rgba(255,74,106,.4);pointer-events:none}
+.hud{position:absolute;right:10px;top:calc(env(safe-area-inset-top) + 10px);display:flex;gap:6px;z-index:5;pointer-events:none;flex-wrap:wrap;justify-content:flex-end;max-width:62%}
+.chip{background:var(--glass);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid var(--line);color:#ffe9a8;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.25)}
+#focusChip{display:none;background:rgba(255,207,107,.94);color:#3a2a1c;border-color:transparent}
+.bar{position:relative;flex:none;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:8px 10px calc(env(safe-area-inset-bottom) + 8px);background:linear-gradient(180deg,rgba(22,20,46,.94),rgba(10,10,28,.98));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
+.tb{appearance:none;border:0;background:transparent;color:#aeb6e0;font:inherit;font-size:11px;font-weight:700;padding:6px 2px 5px;border-radius:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:background .15s,color .15s,transform .1s}
+.tb i{font-style:normal;font-size:22px;line-height:1.1;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
+.tb:active{transform:scale(.94);background:rgba(255,255,255,.08)}
+.tb.on{color:#ffe9a8;background:linear-gradient(180deg,rgba(255,207,107,.22),rgba(255,207,107,.08));box-shadow:inset 0 0 0 1px rgba(255,207,107,.35)}
+@media (min-width:700px){.bar{max-width:640px;margin:0 auto;width:100%;border-radius:20px 20px 0 0}.tb{flex-direction:row;justify-content:center;gap:6px;font-size:13px;padding:10px 4px}.tb i{font-size:18px}}
 body.strip .tb span{display:none}
 /* panels */
-#panel{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(8,10,25,.55);padding:14px}
+#panel{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(6,8,22,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);padding:14px}
 #panel.hide{display:none}
-.card{width:min(440px,100%);max-height:min(560px,88vh);overflow:auto;background:var(--paper);border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink);padding:14px 14px 12px}
-.card h2{font-size:17px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center}
-.card h2 button{appearance:none;border:2px solid var(--ink);background:#fff;font-weight:900;width:28px;height:28px;cursor:pointer}
-.sub{font-size:12px;color:#6b5a6e;margin-bottom:10px;line-height:1.6}
-.row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dashed #d8c39c;font-size:13px}
+.card{width:min(460px,100%);max-height:min(660px,88vh);overflow:auto;background:linear-gradient(180deg,#fdf6e4,#f6ead0);border:1px solid rgba(60,40,70,.18);border-radius:22px;box-shadow:0 24px 60px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.7);padding:18px 18px 16px;overscroll-behavior:contain;animation:rise .22s ease-out}
+@keyframes rise{from{transform:translateY(18px);opacity:.3}}
+.card h2{font-size:18px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;font-weight:800}
+.card h2 button{appearance:none;border:0;background:rgba(43,34,51,.08);color:var(--ink);font-weight:900;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:14px}
+.sub{font-size:12.5px;color:#6b5a6e;margin-bottom:12px;line-height:1.65}
+.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(120,90,60,.14);font-size:14px}
 .row:last-child{border-bottom:0}
 .row .grow{flex:1;min-width:0}
-.row small{display:block;color:#7a6a7d;font-size:11px;line-height:1.4}
-.btn{appearance:none;border:2px solid var(--ink);background:#ffcf6b;color:var(--ink);font:inherit;font-weight:800;font-size:12px;padding:5px 10px;box-shadow:0 2px 0 var(--ink);cursor:pointer;white-space:nowrap}
-.btn:disabled{background:#e6dcc8;color:#a99;cursor:default}
-.btn.big{font-size:14px;padding:8px 16px}
-.btn.alt{background:#fff}
+.row small{display:block;color:#7a6a7d;font-size:11.5px;line-height:1.45;margin-top:1px}
+.btn{appearance:none;border:0;background:linear-gradient(180deg,#ffd98a,#ffc24d);color:#3a2a1c;font:inherit;font-weight:800;font-size:12.5px;padding:8px 14px;border-radius:999px;box-shadow:0 2px 0 rgba(150,90,10,.35),0 4px 10px rgba(150,90,10,.18);cursor:pointer;white-space:nowrap;transition:transform .1s,filter .15s}
+.btn:active{transform:translateY(1px);filter:brightness(.96)}
+.btn:disabled{background:#e6dcc8;color:#a99a8a;box-shadow:none;cursor:default}
+.btn.big{font-size:15px;padding:12px 22px}
+.btn.alt{background:#fff;border:1px solid rgba(60,40,70,.18);box-shadow:0 2px 6px rgba(0,0,0,.08)}
 img.fish{width:48px;height:28px;image-rendering:pixelated;flex:none}
 img.fish.q{filter:brightness(0) opacity(.25)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px}
-.cell{border:2px solid #d8c39c;background:#fff8ea;padding:5px;text-align:center;font-size:11px;line-height:1.35}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px}
+.cell{border:1px solid rgba(120,90,60,.18);background:rgba(255,255,255,.6);border-radius:14px;padding:7px 5px;text-align:center;font-size:11px;line-height:1.4}
 .cell img{width:56px;height:32px;image-rendering:pixelated}
 .cell.unk{color:#b9a98c}
 .dots{letter-spacing:2px;font-size:14px;color:#c9b27a}
 .dots b{color:#ffb200}
-textarea{width:100%;height:76px;border:2px solid var(--ink);background:#fff;padding:8px;font:inherit;font-size:16px;resize:none;margin:6px 0}
-input[type=range]{width:100%;accent-color:#ff9a3c}
-select{font:inherit;border:2px solid var(--ink);padding:3px;background:#fff}
+textarea{width:100%;height:80px;border:1px solid rgba(60,40,70,.25);border-radius:14px;background:#fff;padding:10px;font:inherit;font-size:16px;resize:none;margin:8px 0;outline:none}
+input[type=range]{width:100%;accent-color:#ff9a3c;height:30px}
+select{font:inherit;border:1px solid rgba(60,40,70,.25);border-radius:10px;padding:6px;background:#fff;font-size:14px}
 .center{text-align:center}
-.msg{font-size:15px;line-height:1.8;padding:10px 4px;text-align:center}
-/* catch toast */
+.msg{font-size:15px;line-height:1.8;padding:12px 4px;text-align:center}
 .ftxt{position:absolute;z-index:7;transform:translate(-50%,-100%);font-weight:900;font-size:13px;color:#ffe9a8;text-shadow:0 2px 0 #2b2233,2px 0 0 #2b2233,-2px 0 0 #2b2233,0 -2px 0 #2b2233;white-space:nowrap;pointer-events:none;animation:ftxt 1.4s ease-out forwards}
 @keyframes ftxt{0%{opacity:0;margin-top:6px}15%{opacity:1;margin-top:0}75%{opacity:1}100%{opacity:0;margin-top:-22px}}
-#toast{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:6;background:var(--paper);border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:7px 12px;display:flex;gap:9px;align-items:center;font-size:13px;font-weight:800;max-width:92%;transition:opacity .3s,transform .3s;pointer-events:none}
+#toast{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:6;background:rgba(18,16,40,.9);color:#fff4d8;border:1px solid var(--line);border-radius:16px;padding:9px 14px;display:flex;gap:10px;align-items:center;font-size:13px;font-weight:700;max-width:92%;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(0,0,0,.35);transition:opacity .3s,transform .3s;pointer-events:none}
 #toast.hide{opacity:0;transform:translate(-50%,10px)}
 #toast img{width:56px;height:32px;image-rendering:pixelated}
-#toast small{display:block;font-weight:600;color:#7a6a7d;font-size:11px}
-/* reel minigame */
-#reel{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;padding-bottom:18vh;background:rgba(0,0,0,.18);cursor:pointer}
+#toast small{display:block;font-weight:500;color:#b8b0d8;font-size:11.5px;margin-top:1px}
+body.editing #toast{bottom:70px}
+/* reel */
+#reel{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;padding-bottom:20vh;background:rgba(0,0,0,.2);cursor:pointer}
 #reel.hide{display:none}
-#reelBox{background:var(--paper);border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:10px 12px;width:min(320px,90vw);text-align:center;font-weight:800;font-size:13px}
-#reelBar{position:relative;height:18px;border:2px solid var(--ink);background:#5a6a9a;margin-top:8px}
-#reelZone{position:absolute;top:0;bottom:0;background:#7be08a}
-#reelMark{position:absolute;top:-4px;bottom:-4px;width:4px;background:#2b2233;margin-left:-2px}
-.note{font-size:11px;color:#7a6a7d;margin-top:6px}
+#reelBox{background:rgba(18,16,40,.92);color:#fff4d8;border:1px solid var(--line);border-radius:20px;box-shadow:0 12px 32px rgba(0,0,0,.45);padding:14px 16px;width:min(340px,92vw);text-align:center;font-weight:800;font-size:14px}
+#reelBar{position:relative;height:22px;border-radius:12px;background:#33407a;margin-top:10px;overflow:visible}
+#reelZone{position:absolute;top:0;bottom:0;background:linear-gradient(180deg,#8cf09c,#5ac870);border-radius:12px}
+#reelMark{position:absolute;top:-4px;bottom:-4px;width:5px;background:#fff;border-radius:3px;margin-left:-2px;box-shadow:0 0 8px rgba(255,255,255,.8)}
+.note{font-size:11.5px;color:#b8b0d8;margin-top:8px;font-weight:500}
 a{color:#ffcf6b}
 #bHelp{display:none}
-/* ---------- phones ---------- */
-@media (hover:none) and (pointer:coarse){ #bStrip{display:none} #bHelp{display:flex} }
+/* camp / quests UI */
+.tabs{display:flex;gap:6px;background:rgba(43,34,51,.07);padding:4px;border-radius:14px;margin:12px 0 8px}
+.tab{flex:1;appearance:none;border:0;background:transparent;font:inherit;font-weight:800;font-size:13px;padding:8px 4px;border-radius:11px;color:#7a6a7d;cursor:pointer}
+.tab.on{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.meter{height:8px;background:rgba(43,34,51,.12);border-radius:5px;overflow:hidden;flex:1}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,#ffcf6b,#ff9a5a);border-radius:5px;transition:width .3s}
+.campcard{background:rgba(255,255,255,.55);border:1px solid rgba(120,90,60,.15);border-radius:16px;padding:10px 12px;margin-top:8px}
+.campcard input{width:100%;border:0;background:transparent;font:inherit;font-size:17px;font-weight:800;color:var(--ink);outline:none;border-bottom:1px dashed rgba(60,40,70,.25);padding:2px 0 4px}
+.xpline{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px}
+.beauty{margin-top:6px;font-size:12px;color:#6b5a6e}
+.seclab{font-size:12px;font-weight:800;color:#8a6a4a;margin-top:12px;letter-spacing:.3px}
+.swgrid{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 4px}
+.sw{width:40px;height:40px;border-radius:12px;border:2px solid transparent;background:linear-gradient(135deg,var(--c) 55%,var(--c2) 55%);cursor:pointer;position:relative;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.sw.on{border-color:#2b2233;box-shadow:0 0 0 2px #ffcf6b}
+.sw.lock{filter:grayscale(.85) brightness(.85);opacity:.7}
+.sw em{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-style:normal;font-weight:800;color:#fff;text-shadow:0 1px 2px #000}
+.itemimg{width:46px;height:38px;object-fit:contain;image-rendering:pixelated;background:rgba(43,34,51,.06);border-radius:10px;padding:3px;flex:none}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
+.tile{appearance:none;border:0;background:#fff;border-radius:16px;padding:14px 4px;font:inherit;font-weight:700;font-size:12.5px;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,.08);cursor:pointer}
+.tile:active{transform:scale(.96)}
+.tile i{font-style:normal;font-size:26px}
+.lockt{font-size:11px;color:#b0583a;font-weight:700}
+.badge{display:inline-block;background:#ffe9a8;color:#7a5a10;border-radius:8px;padding:1px 7px;font-size:11px;font-weight:800}
+.qmeter{display:flex;align-items:center;gap:8px;margin-top:5px}
+.qmeter small{margin:0;white-space:nowrap}
+#editBar{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:8;display:flex;align-items:center;gap:8px;background:var(--glass);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:999px;padding:6px 8px 6px 14px;color:#ffe9a8;font-size:12.5px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.35);white-space:nowrap}
+#editBar.hide{display:none}
+#editBar .btn{padding:7px 12px}
 @media (max-width:640px){
-  .bar{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:6px 6px calc(env(safe-area-inset-bottom) + 6px);overflow:visible}
-  .tb{flex-direction:column;justify-content:center;gap:1px;min-height:48px;padding:4px 2px;font-size:10.5px;line-height:1.15;white-space:normal;text-align:center}
-  .tb i{font-size:19px}
-  .bar>.tb:first-child,.bar>.tb:last-child{margin:0}
-  .chip{font-size:11px;padding:1px 5px;box-shadow:1px 1px 0 var(--ink)}
-  .hud{gap:4px;max-width:70%}
-  .beta{font-size:9px;padding:2px 5px;letter-spacing:0}
+  .bar{padding:6px 6px calc(env(safe-area-inset-bottom) + 6px)}
+  .chip{font-size:11px;padding:3px 8px}
+  .hud{gap:4px}
   #panel{align-items:flex-end;padding:0}
-  .card{width:100%;max-height:80vh;border-width:3px 0 0;border-radius:16px 16px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.35);padding:16px 14px calc(env(safe-area-inset-bottom) + 16px);animation:sheet .22s ease-out}
-  .card::before{content:'';display:block;width:42px;height:5px;border-radius:3px;background:#d8c39c;margin:-6px auto 10px}
-  .card h2{font-size:18px}
-  .card h2 button{width:38px;height:38px;font-size:16px}
-  .row{font-size:14px;padding:9px 0}
-  .row small{font-size:12px}
-  .btn{min-height:40px;padding:8px 12px;font-size:13px}
-  .btn.big{min-height:48px;font-size:15px}
-  select{min-height:40px;font-size:15px}
-  input[type=range]{height:34px}
-  .grid{grid-template-columns:repeat(auto-fill,minmax(98px,1fr))}
-  #reel{padding-bottom:24vh}
-  #reelBox{width:92vw;font-size:15px;padding:14px}
-  #reelBar{height:28px}
-  #toast{bottom:8px;font-size:13px;padding:6px 10px}
+  .card{width:100%;max-height:84vh;border-radius:24px 24px 0 0;padding:14px 16px calc(env(safe-area-inset-bottom) + 16px)}
+  .card::before{content:'';display:block;width:42px;height:5px;border-radius:3px;background:rgba(60,40,70,.2);margin:0 auto 10px}
+  .btn{min-height:40px}
+  .btn.big{min-height:48px}
+  #reel{padding-bottom:26vh}
 }
-@keyframes sheet{from{transform:translateY(40px);opacity:.4}}
 @media (orientation:landscape) and (max-height:500px){
-  .bar{display:flex;grid-template-columns:none;padding:5px 6px calc(env(safe-area-inset-bottom) + 5px)}
-  .tb{flex-direction:row;min-height:36px;font-size:10px;padding:3px 6px;gap:3px}
-  .tb i{font-size:14px}
-  .bar{gap:4px}
+  .bar{padding:4px 8px calc(env(safe-area-inset-bottom) + 4px)}
+  .tb{flex-direction:row;justify-content:center;gap:5px;padding:6px 4px;font-size:11px}
+  .tb i{font-size:16px}
   #panel{align-items:center;padding:8px}
-  .card{max-height:92vh;border-radius:12px;border-width:3px}
+  .card{max-height:92vh;border-radius:18px}
+  .card::before{display:none}
 }
 </style>
 </head>
@@ -123,23 +142,28 @@ a{color:#ffcf6b}
   </div>
   <div id="sceneWrap">
     <canvas id="cv"></canvas>
-    <div class="beta">BETA v0.1.4</div>
+    <div class="hudL"><div class="campchip" id="hCamp"></div><div class="beta">BETA v0.2.0</div></div>
     <div class="hud"><div class="chip" id="focusChip">⏳ 25:00</div><div class="chip" id="hWarm">🔥 0</div><div class="chip" id="hDust">✨ 0</div><div class="chip" id="hTime">🌙 00:00</div></div>
+    <div id="editBar" class="hide"><span id="editName"></span><button class="btn alt" id="eFlip">🔄</button><button class="btn alt" id="eStore">📦</button><button class="btn" id="eDone">✓</button></div>
     <div id="toast" class="hide"><img id="tImg" alt=""><div><span id="tTitle"></span><small id="tSub"></small></div></div>
   </div>
   <div class="bar" id="bar">
     <button class="tb on" id="bAuto"><i>🎣</i><span data-k="auto">挂机钓鱼</span></button>
     <button class="tb" data-p="cook"><i>🍳</i><span data-k="cook">营火烹饪</span></button>
+    <button class="tb" data-p="camp"><i>⛺</i><span data-k="camp">营地</span></button>
     <button class="tb" data-p="star"><i>✨</i><span data-k="star">星图</span></button>
-    <button class="tb" data-p="book"><i>📖</i><span data-k="book">手帐</span></button>
-    <button class="tb" data-p="focus"><i>⏳</i><span data-k="focus">专注</span></button>
-    <button class="tb" data-p="worry"><i>📝</i><span data-k="worry">烧烦恼</span></button>
-    <button class="tb" data-p="sound"><i>🎧</i><span data-k="sound">声音</span></button>
-    <button class="tb" id="bStrip"><i>▭</i><span data-k="strip">条状模式</span></button>
-    <button class="tb" id="bLang"><i>🌐</i><span data-k="lang">English</span></button>
-    <button class="tb" data-p="help" id="bHelp"><i>❔</i><span data-k="help">玩法</span></button>
-    <button class="tb" data-p="set"><i>⚙</i><span data-k="set">设置</span></button>
+    <button class="tb" data-p="more"><i>☰</i><span data-k="more">更多</span></button>
   </div>
+</div>
+<div id="hiddenBtns" style="display:none">
+  <button class="tb" data-p="book"><i>📖</i><span data-k="book">手帐</span></button>
+  <button class="tb" data-p="focus"><i>⏳</i><span data-k="focus">专注</span></button>
+  <button class="tb" data-p="worry"><i>📝</i><span data-k="worry">烧烦恼</span></button>
+  <button class="tb" data-p="sound"><i>🎧</i><span data-k="sound">声音</span></button>
+  <button class="tb" id="bStrip"><i>▭</i><span data-k="strip">条状模式</span></button>
+  <button class="tb" id="bLang"><i>🌐</i><span data-k="lang">English</span></button>
+  <button class="tb" data-p="help" id="bHelp"><i>❔</i><span data-k="help">玩法</span></button>
+  <button class="tb" data-p="set"><i>⚙</i><span data-k="set">设置</span></button>
 </div>
 <div id="panel" class="hide"><div class="card" id="card"></div></div>
 <div id="reel" class="hide"><div id="reelBox"><div id="reelTxt">鱼上钩了！在绿色区域点击</div><div id="reelBar"><div id="reelZone"></div><div id="reelMark"></div></div><div class="note" id="reelNote">点击屏幕任意处收竿</div></div></div>
@@ -163,11 +187,14 @@ function seeded(s) { return () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math
 
 // ============================================================ save
 const SAVE_KEY = 'sbc_save_v1';
-const DEF = { warmth: 0, dust: 0, fish: {}, dishes: 0, book: {}, lit: {}, done: [], up: { rod: 0, bait: 0, auto: 0 }, decor: [], gifts: 0, lastSeen: Date.now(), vol: { fire: .6, rain: 0, wave: .4, bug: .5, music: .35 }, autoOn: true, timeMode: 'real', meteorPreview: false, strip: false, summon: null, catches: 0, lang: null, grill: [] };
+const DEF = { warmth: 0, dust: 0, fish: {}, dishes: 0, book: {}, lit: {}, done: [], up: { rod: 0, bait: 0, auto: 0 }, decor: [], gifts: 0, lastSeen: Date.now(), vol: { fire: .6, rain: 0, wave: .4, bug: .5, music: .35 }, autoOn: true, timeMode: 'real', meteorPreview: false, strip: false, summon: null, catches: 0, lang: null, grill: [], camp: null, xp: 0, quest: null, ach: {}, rec: {}, stats: {} };
 let G;
 try { G = Object.assign({}, DEF, JSON.parse(localStorage.getItem(SAVE_KEY) || '{}')); } catch (e) { G = Object.assign({}, DEF); }
 G.vol = Object.assign({}, DEF.vol, G.vol); G.up = Object.assign({}, DEF.up, G.up);
 if (!Array.isArray(G.grill)) G.grill = [];
+G.camp = Object.assign({ name: '', placed: [], inv: {}, cos: {}, cd: {} }, G.camp || {});
+G.stats = Object.assign({ cooked: 0, perfect: 0, focusMin: 0, lit: 0 }, G.stats || {});
+G.rec = G.rec || {}; G.ach = G.ach || {}; G.xp = G.xp || 0;
 if (!G.lang) G.lang = /^zh/i.test(navigator.language || '') ? 'zh' : 'en';
 const T = (zh, en) => G.lang === 'en' ? en : zh;
 function save() { G.lastSeen = Date.now(); try { localStorage.setItem(SAVE_KEY, JSON.stringify(G)); } catch (e) {} }
@@ -264,6 +291,22 @@ const LEGEND = {
   gemini: { name: '双子星鱼', c: ['#fff0c8', '#c8a0ff'], glow: '#ffffff' }
 };
 for (const k in LEGEND) FISH.push({ id: 'L_' + k, name: LEGEND[k].name, v: 30, w: 0, legend: k, c: LEGEND[k].c, glow: LEGEND[k].glow, note: `${CONS[k].name}的守护者，只回应点亮整座星座的人。` });
+FISH.push(
+  { id: 'goldcrucian', name: '金鲫', v: 9, w: 5, t: 'any', lvl: 3, c: ['#ffd84a', '#e09a1a'], glow: '#fff3b0', note: '像掉进湖里的一枚金币。' },
+  { id: 'rainbowtrout', name: '彩虹鳟', v: 8, w: 8, t: 'day', lvl: 2, c: ['#a8e0ff', '#ff9ac8'], stripe: '#7be08a', note: '白天所有的颜色都在它身上。' },
+  { id: 'mistperch', name: '晨雾鲈', v: 7, w: 10, t: 'dawn', lvl: 2, c: ['#c8d8e0', '#8aa0b0'], note: '随清晨的薄雾一起浮上来。' },
+  { id: 'ambereel', name: '琥珀鳗', v: 9, w: 8, t: 'dusk', lvl: 4, c: ['#e8a840', '#a86818'], glow: '#ffd890', long: true, note: '像黄昏最后一缕光。' },
+  { id: 'aurorafish', name: '极光鱼', v: 15, w: 6, t: 'night', season: 'winter', lvl: 6, c: ['#5affc0', '#7a6aff'], glow: '#7affc8', note: '只在冬夜闪烁。' },
+  { id: 'moonbream', name: '月光鲷', v: 8, w: 9, t: 'night', lvl: 3, c: ['#d8e0ff', '#8a98e0'], glow: '#e8f0ff', note: '月光下银闪闪的。' },
+  { id: 'sunfish', name: '暖阳鱼', v: 7, w: 10, t: 'day', season: 'summer', c: ['#ffb84a', '#e8742a'], note: '喜欢夏天的太阳。' },
+  { id: 'ancientkoi', name: '古老锦鲤', v: 25, w: 2, t: 'any', lvl: 8, c: ['#ff6a4a', '#fff0e0'], spots: true, note: '一条很老很老的锦鲤，难得一见。' }
+);
+const NEWFISH_EN = {
+  goldcrucian: ['Golden Crucian', 'Like a coin dropped into the lake.'], rainbowtrout: ['Rainbow Trout', 'Wears every color of the day.'],
+  mistperch: ['Mist Perch', 'Rises with the morning fog.'], ambereel: ['Amber Eel', 'Glows like the last light of dusk.'],
+  aurorafish: ['Aurora Fish', 'Only shimmers on winter nights.'], moonbream: ['Moon Bream', 'Silver under the moonlight.'],
+  sunfish: ['Sunfish', 'Loves the warm summer sun.'], ancientkoi: ['Ancient Koi', 'A very, very old koi. Rarely seen.']
+};
 const FM = Object.fromEntries(FISH.map(f => [f.id, f]));
 const FISH_EN = {
   crucian: ['Little Crucian', 'The lake’s most familiar old friend.'], medaka: ['Medaka', 'Tiny, but swims very earnestly.'],
@@ -355,7 +398,7 @@ addEventListener('resize', layout);
 let scen;
 function buildScenery() {
   const R = seeded(7);
-  const campW = Math.min(150, Math.round(W * .48));
+  const campW = Math.min(150, Math.round(W * (PAD > 0 ? .58 : .48)));
   const lakeX = campW - 6;
   const hills = []; for (let x = 0; x <= W; x += 2) hills.push(76 + Math.sin(x * .02) * 5 + Math.sin(x * .053 + 1) * 3);
   const trees = []; for (let x = -4; x < W + 6; x += 5 + R() * 6) trees.push({ x, h: 9 + R() * 11, d: R() < .5 });
@@ -386,6 +429,7 @@ function rollFish() {
   const h = hourNow(), ph = phaseOf(h), mi = moonInfo(), se = season(), met = meteorToday() && nightFactor(h) > .6, rain = G.vol.rain > .25;
   const pool = FISH.filter(f => {
     if (f.legend || !f.w) return false;
+    if (f.lvl && f.lvl > levelNow()) return false;
     if (f.t !== 'any' && !f.t.split(',').includes(ph)) return false;
     if (f.season && f.season !== se) return false;
     if (f.rain && !rain) return false;
@@ -532,7 +576,7 @@ function drawGrill(nf) {
 
 // ============================================================ drawing
 function px(x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
-const DOG = ['.o.....o.', 'obo...obo', 'obbbbbbbo', 'obkbbbkbo', 'obbwnwbbo', '.obbbbbo.', 'obbbbbbbo', 'oobobobboo'.slice(0, 9)];
+const DOG = ['.o.....o.', 'obo...obo', 'obbbbbbbo', 'obkbbbkbo', 'obbwnwbbo', '.occccco.', 'obbbbbbbo', 'oobobobboo'.slice(0, 9)];
 const DOG_SLEEP = ['.........', '.........', '.o.....o.', 'obooooobo', 'obbbbbbbo', 'obkkbkkbbo'.slice(0, 9), 'obbbbbbbbo'.slice(0, 9), '.ooooooo.'];
 const DOGPAL = { o: '#3b2a20', b: '#e0b07a', k: '#2b2233', w: '#fff3e0', n: '#2b2233' };
 function drawMap(map, x, y, pal) { map.forEach((row, j) => { for (let i = 0; i < row.length; i++) { const c = pal[row[i]]; if (c) px(x + i, y + j, 1, 1, c); } }); }
@@ -582,12 +626,13 @@ function draw(dt) {
   // shooting stars
   for (const s of fx.shoots) { for (let i = 0; i < 8; i++) px(s.x - i * 1.6, s.y - i * .7, 1, 1, `rgba(255,250,220,${(1 - i / 8) * s.a})`); }
   // hills & trees
+  drawFar(nf);
   ctx.fillStyle = mix('#2a3a6a', '#141a34', nf); ctx.beginPath(); ctx.moveTo(0, 96);
   sc.hills.forEach((y, i) => ctx.lineTo(i * 2, y)); ctx.lineTo(W, 96); ctx.fill();
   const treeC = mix('#2f5a48', '#0e1a22', nf), treeC2 = mix('#24483a', '#0a141c', nf);
   for (const t of sc.trees) { const base = 95; for (let j = 0; j < t.h; j++) { const hw = Math.floor((j / t.h) * 4) + 1; px(t.x - hw, base - t.h + j, hw * 2 + 1, 1, t.d ? treeC2 : treeC); } }
   // ground (camp) & lake
-  const gC = mix('#6aa85a', '#1e2e2a', nf), gC2 = mix('#5a9650', '#18262a', nf);
+  const gcv = cosv('ground'), gC = mix(gcv.a, '#1e2e2a', nf), gC2 = mix(gcv.b, '#18262a', nf);
   px(0, 92, sc.lakeX + 4, H - 92, gC);
   for (let x = 0; x < sc.lakeX; x += 3) px(x, 92 + ((x * 7) % 5), 1, 1, gC2);
   const wC = mix('#4a8ac8', '#101a3a', nf), wC2 = mix('#3a78b8', '#0c1430', nf);
@@ -599,36 +644,39 @@ function draw(dt) {
     if (mx > sc.lakeX) for (let y = 98; y < H; y += 3) { const w = 3 + Math.sin(tm * 2 + y) * 2; px(mx - w / 2 + Math.sin(tm + y * .3) * 2, y, w, 1, `rgba(255,243,207,${.35 * mi.illum * nf})`); }
     for (const s of sc.stars) if (s.x > sc.lakeX && s.b > .6 && !rainOn) px(s.x, 190 - s.y, 1, 1, `rgba(255,248,220,${.25 * nf * (.6 + .4 * Math.sin(tm * 3 + s.tw))})`);
   } else for (let i = 0; i < 6; i++) px(sc.lakeX + 10 + ((tm * 6 + i * 37) % (W - sc.lakeX - 20)), 100 + i * 5, 6, 1, 'rgba(255,255,255,.35)');
+  drawGroundDetail(nf);
   // dock
   const dC = mix('#a8784a', '#3a2a22', nf), dC2 = mix('#7a5432', '#2a1e18', nf);
   px(sc.dockX, 99, sc.dockEnd - sc.dockX, 3, dC); for (let x = sc.dockX + 2; x < sc.dockEnd; x += 8) px(x, 102, 2, 8, dC2);
   // ripples
   for (const r of fx.ripples) { if (r.r < 0) continue; ctx.strokeStyle = `rgba(255,255,255,${.5 * (1 - r.r / 10)})`; ctx.beginPath(); ctx.ellipse(r.x, r.y + 1, r.r, r.r * .35, 0, 0, Math.PI * 2); ctx.stroke(); }
   // tent
-  const tx = sc.tentX, ty = 90, tC = mix('#e8823a', '#5a3a2a', nf * .8), tC2 = mix('#c86428', '#40281e', nf * .8);
+  const tx = sc.tentX, ty = 90, tcv = cosv('tent'), tC = mix(tcv.a, '#5a3a2a', nf * .8), tC2 = mix(tcv.b, '#40281e', nf * .8);
   for (let j = 0; j < 18; j++) { const hw = Math.round(j * .95); px(tx + 13 - hw, ty - 18 + j + 4, hw * 2 + 1, 1, j > 5 && Math.abs(hw) < j * .45 ? '#2b2233' : (j % 6 === 0 ? tC2 : tC)); }
   px(tx + 13, ty - 15, 1, 18, tC2);
+  drawTentDetail(tx, ty, nf);
   // decorations
-  const dec = G.decor;
+  const dec = [];
   if (dec.includes('lights')) for (let i = 0; i <= 10; i++) { const x = tx + 26 + i * ((sc.fireX - tx - 22) / 10), y = 80 + Math.sin(i / 10 * Math.PI) * 4; px(x, y, 1, 1, pick ? ['#ff9a9a', '#ffe08a', '#9ae0ff', '#b8ff9a'][i % 4] : '#fff'); }
   if (dec.includes('flowers')) for (let i = 0; i < 6; i++) { px(4 + i * 5, 110 + (i % 2) * 6, 1, 2, '#3a6a3a'); px(4 + i * 5, 109 + (i % 2) * 6, 1, 1, ['#ff8aa8', '#ffe08a', '#c8a0ff'][i % 3]); }
   if (dec.includes('chair')) { const cx = sc.fireX + 12; px(cx, 104, 7, 2, '#3a6aa8'); px(cx + 6, 98, 2, 7, '#3a6aa8'); px(cx, 106, 1, 4, '#555'); px(cx + 6, 106, 1, 4, '#555'); }
   if (dec.includes('scope')) { const sx = Math.max(sc.tentX + 30, sc.fireX - 26); px(sx, 92, 1, 12, '#555'); px(sx - 3, 104, 7, 1, '#555'); ctx.save(); ctx.translate(sx, 92); ctx.rotate(-.6); ctx.fillStyle = '#c8c8e0'; ctx.fillRect(-2, -2, 10, 3); ctx.restore(); }
   if (dec.includes('chime')) { const cx = tx + 4; px(cx, 70, 1, 4, '#888'); for (let i = 0; i < 3; i++) px(cx - 2 + i * 2, 74 + Math.round(Math.sin(tm * 3 + i)), 1, 4, '#c8e0ff'); }
   // campfire
+  drawItems(nf);
   const fxX = sc.fireX, fyY = 106, big = focus.on ? 1.5 : 1;
   px(fxX - 6, fyY, 12, 2, '#6a4026'); px(fxX - 4, fyY - 1, 8, 2, '#8a5a32');
   for (let i = 0; i < 5; i++) px(fxX - 7 + i * 3, fyY + 2, 2, 1, '#777');
   // dog
   dogSleep = nf > .85 && !fx.hearts.length;
   const dx = fxX - 22, dy = 98;
-  drawMap(dogSleep ? DOG_SLEEP : DOG, dx, dy + (dogSleep ? 0 : Math.round(Math.sin(tm * 2) * .4)), DOGPAL);
-  if (!dogSleep) px(dx + 9, dy + 5 + Math.round(Math.sin(tm * 10)), 2, 1, DOGPAL.b);
+  drawMap(dogSleep ? DOG_SLEEP : DOG, dx, dy + (dogSleep ? 0 : Math.round(Math.sin(tm * 2) * .4)), dogPal());
+  if (!dogSleep) px(dx + 9, dy + 5 + Math.round(Math.sin(tm * 10)), 2, 1, dogPal().b);
   // visitor
   if (visitor) drawMap(FOX, visitor.x, 96, FOXPAL), (visitor.wait && (px(visitor.x + 2, 86, 9, 7, '#fff8ea'), px(visitor.x + 2, 86, 9, 1, '#2b2233'), px(visitor.x + 5, 88, 3, 3, '#e8823a')));
   // person + rod
   const pxX = sc.dockEnd - 9, pyY = 89;
-  drawMap(PERSON, pxX, pyY, PERSONPAL);
+  drawMap(PERSON, pxX, pyY, personPal());
   const tipX = pxX + 18, tipY = pyY - 6;
   ctx.strokeStyle = '#5a3a22'; ctx.beginPath(); ctx.moveTo(pxX + 8, pyY + 7.5); ctx.lineTo(tipX, tipY); ctx.stroke();
   if (fishing.st === 'wait' || fishing.st === 'bite') {
@@ -642,8 +690,9 @@ function draw(dt) {
   if (nf > 0) { ctx.fillStyle = `rgba(8,10,30,${nf * .35})`; ctx.fillRect(0, 88, W, H - 88); }
   // lights (additive)
   ctx.globalCompositeOperation = 'lighter';
+  drawItemGlows(nf);
   const glowR = (36 + Math.sin(tm * 9) * 2 + Math.sin(tm * 23)) * big;
-  const gf = ctx.createRadialGradient(fxX, fyY - 2, 0, fxX, fyY - 2, glowR); gf.addColorStop(0, `rgba(255,150,60,${.25 + nf * .35})`); gf.addColorStop(1, 'rgba(255,120,40,0)');
+  const gf = ctx.createRadialGradient(fxX, fyY - 2, 0, fxX, fyY - 2, glowR); gf.addColorStop(0, `rgba(${cosv('flame').g},${.25 + nf * .35})`); gf.addColorStop(1, `rgba(${cosv('flame').g},0)`);
   ctx.fillStyle = gf; ctx.fillRect(fxX - glowR, fyY - 2 - glowR, glowR * 2, glowR * 2);
   if (dec.includes('lantern')) { const lx = tx + 30, ly = 96; const gl = ctx.createRadialGradient(lx, ly, 0, lx, ly, 16); gl.addColorStop(0, `rgba(255,220,120,${.15 + nf * .3})`); gl.addColorStop(1, 'rgba(255,220,120,0)'); ctx.fillStyle = gl; ctx.fillRect(lx - 16, ly - 16, 32, 32); }
   if (summonGlow > 0 && G.summon) { const c = sc.cons.find(c => c.k === G.summon); if (c) { const g3 = ctx.createRadialGradient(c.x + c.w / 2, c.y + c.h / 2, 0, c.x + c.w / 2, c.y + c.h / 2, 40); g3.addColorStop(0, `rgba(255,240,180,${.2 * summonGlow * nf})`); g3.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g3; ctx.fillRect(c.x - 20, c.y - 20, c.w + 40, c.h + 40); } }
@@ -654,7 +703,7 @@ function draw(dt) {
   // particles
   for (const p of fx.parts) {
     let c = p.c;
-    if (p.fire) { const k = p.life; c = k > .5 ? '#ffe36a' : k > .3 ? '#ff9a3c' : '#e84a2a'; if (p.burnCol) c = p.burnCol; }
+    if (p.fire) { const k = p.life; const FLm = cosv('flame'); c = k > .5 ? FLm.a : k > .3 ? FLm.b : FLm.c; if (p.burnCol) c = p.burnCol; }
     px(p.x, p.y, p.fire && p.life > .45 ? 2 : 1, 1, c);
   }
   drawGrill(nf);
@@ -662,6 +711,7 @@ function draw(dt) {
   if (dogSleep) { const z = Math.floor(tm * 1.5) % 3; for (let i = 0; i <= z; i++) px(dx + 10 + i * 3, dy - 3 - i * 3, 2, 1, '#cfd6ff'); }
   // rain
   if (rainOn) { ctx.fillStyle = `rgba(190,210,255,${.35 + G.vol.rain * .3})`; const n = Math.round(W * .25 * G.vol.rain * (1 + PAD / H)); for (let i = 0; i < n; i++) { const x = (i * 37.3 + tm * 140) % (W + 30) - 15, y = (i * 53.7 + tm * 260) % (H + PAD) - PAD; ctx.fillRect(Math.round(x), Math.round(y), 1, 3); } }
+  drawFinish(nf);
   if (flash > 0) { ctx.fillStyle = `rgba(255,250,220,${flash * .6})`; ctx.fillRect(0, -PAD, W, H + PAD); }
   ctx.restore();
 }
@@ -694,7 +744,7 @@ function update(dt) {
   if (visitor) {
     if (!visitor.wait && !visitor.leaving) { visitor.x += 14 * dt; if (visitor.x >= visitor.tx) { visitor.wait = true; visitor.t = 0; } }
     else if (visitor.wait) { visitor.t += dt; if (visitor.t > 60) { visitor.wait = false; visitor.leaving = true; } }
-    if (visitor.leaving) { visitor.x -= 16 * dt; if (visitor.x < -14) { visitor = null; visitorT = rand(150, 300); } }
+    if (visitor.leaving) { visitor.x -= 16 * dt; if (visitor.x < -14) { visitor = null; visitorT = rand(150, 300) / (1 + beauty() / 60); } }
   }
   // focus
   if (focus.on) { const left = Math.max(0, focus.end - Date.now()); $('#focusChip').textContent = '⏳ ' + String(Math.floor(left / 60000)).padStart(2, '0') + ':' + String(Math.floor(left / 1000) % 60).padStart(2, '0'); if (left <= 0) endFocus(true); }
@@ -756,6 +806,8 @@ function sceneXY(e) { const r = cv.getBoundingClientRect(); return [(e.clientX -
 cv.addEventListener('pointerdown', e => {
   sound.start();
   const [x, y] = sceneXY(e);
+  if (edit.on) { editDown(e, x, y); return; }
+  if (itemTap(x, y)) return;
   for (const s of fx.shoots) if (Math.hypot(s.x - x, s.y - y) < 18) { s.life = 0; G.dust += meteorToday() ? 3 : 2; sfx.chime(); showToast(null, T('🌠 许了一个愿', '🌠 You made a wish'), T('星屑 +', 'Stardust +') + (meteorToday() ? 3 : 2), 1800); hud(); return; }
   for (let i = 0; i < G.grill.length; i++) if (Math.abs(x - grillX(i)) <= 5.5 && y > 80 && y < 104) { grillAct(i); return; }
   if (visitor && visitor.wait && Math.abs(x - (visitor.x + 5)) < 12 && y > 80) { giftVisitor(); return; }
@@ -793,7 +845,7 @@ $('#bAuto').onclick = () => { sound.start(); G.autoOn = !G.autoOn; hud(); save()
 $('#bLang').onclick = () => { G.lang = G.lang === 'en' ? 'zh' : 'en'; save(); applyLang(); hud(); };
 $('#bStrip').onclick = () => { G.strip = !G.strip; save(); layout(); showToast(null, G.strip ? T('▭ 条状模式', '▭ Strip mode') : T('▭ 完整模式', '▭ Full mode'), G.strip ? T('把浏览器窗口缩小放到屏幕底部试试（桌面版会是真正的置顶小窗）', 'Try shrinking your browser window to the bottom of the screen (the desktop version will be a real always-on-top strip)') : '', 2600); };
 function head(t, sub) { return `<h2>${t}<button onclick="document.querySelector('#panel').classList.add('hide')">✕</button></h2>${sub ? `<div class="sub">${sub}</div>` : ''}`; }
-function openPanel(p, arg) {
+function openPanelBase(p, arg) {
   let h = '';
   const ok = T('好', 'OK');
   if (p === 'cook') {
@@ -808,8 +860,6 @@ function openPanel(p, arg) {
     h += `<h2 style="margin-top:12px;font-size:15px">${T('升级', 'Upgrades')} <span style="font-size:12px">${T('暖意', 'Warmth')} 🔥 ${G.warmth}</span></h2>`;
     const UP = [['rod', T('鱼竿', 'Fishing Rod'), T('收竿时绿色区域更宽', 'Wider green zone when reeling')], ['bait', T('鱼饵', 'Bait'), T('鱼更快上钩', 'Fish bite sooner')], ['auto', T('自动渔具', 'Auto Gear'), T('挂机时更容易钓到', 'Better catch rate while idle')]];
     for (const [k, n, d] of UP) { const lv = G.up[k], cost = 15 + lv * 20; h += `<div class="row"><div class="grow"><b>${n} Lv.${lv}</b><small>${d}</small></div>${lv >= 5 ? `<button class="btn" disabled>${T('满级', 'Max')}</button>` : `<button class="btn" data-up="${k}" ${G.warmth < cost ? 'disabled' : ''}>${cost} 🔥</button>`}</div>`; }
-    h += `<h2 style="margin-top:12px;font-size:15px">${T('营地装饰', 'Camp Decorations')}</h2>`;
-    for (const d of DECOR) { const own = G.decor.includes(d.id); h += `<div class="row"><div class="grow"><b>${T(d.name, d.en)}</b><small>${T(d.d, d.dEn)}</small></div>${own ? `<button class="btn" disabled>${T('已摆放', 'Placed')}</button>` : d.gift ? `<button class="btn alt" disabled>${T('访客赠送', 'Gift only')}</button>` : `<button class="btn" data-dec="${d.id}" ${G.warmth < d.cost ? 'disabled' : ''}>${d.cost} 🔥</button>`}</div>`; }
   } else if (p === 'star') {
     const vis = visibleCons(), h0 = hourNow(), nf = nightFactor(h0), met = meteorToday();
     h = head(T('✨ 星图', '✨ Star Map'), T(`今晚的季节星座会出现在真实的夜空方位。夜里钓到的鱼会带回<b>星屑</b>；点亮一整座星座，它的守护传说鱼就会来找你。<br>星屑 ✨ <b>${G.dust}</b> · ${moonInfo().name} · ${met ? '☄️ 今晚有' + mname(met) + '流星雨！' : '下一场：' + nextMeteor()}`, `Tonight's seasonal constellations appear in the real night sky. Fish caught at night bring back <b>Stardust</b>; light up a whole constellation and its legendary guardian fish will come to you.<br>Stardust ✨ <b>${G.dust}</b> · ${moonInfo().name} · ${met ? '☄️ ' + mname(met) + ' meteor shower tonight!' : 'Next: ' + nextMeteor()}`));
@@ -824,7 +874,7 @@ function openPanel(p, arg) {
     const got = FISH.filter(f => G.book[f.id]).length;
     h = head(T('📖 钓鱼手帐', '📖 Fishing Journal'), T(`已发现 <b>${got}</b> / ${FISH.length} 种 · 总共钓起 ${G.catches} 次`, `Discovered <b>${got}</b> / ${FISH.length} species · ${G.catches} catches in total`));
     h += '<div class="grid">';
-    for (const f of FISH) { const b = G.book[f.id]; h += b ? `<div class="cell"><img src="${fishSprite(f)}"><br><b>${fname(f)}</b><br>×${b.n} · ${b.first}<br><span style="color:#7a6a7d">${fnote(f)}</span></div>` : `<div class="cell unk"><img src="${fishSprite(f)}" style="filter:brightness(0) opacity(.2)"><br>???<br>${hintOf(f)}</div>`; }
+    for (const f of FISH) { const b = G.book[f.id]; h += b ? `<div class="cell"><img src="${fishSprite(f)}"><br><b>${fname(f)}</b><br>×${b.n} · ${b.first}${G.rec[f.id] ? ' · ' + G.rec[f.id] + 'cm' : ''}<br><span style="color:#7a6a7d">${fnote(f)}</span></div>` : `<div class="cell unk"><img src="${fishSprite(f)}" style="filter:brightness(0) opacity(.2)"><br>???<br>${hintOf(f)}</div>`; }
     h += '</div>';
   } else if (p === 'focus') {
     h = head(T('⏳ 专注时光', '⏳ Focus Time'), T('开始专注后，营火会烧得更旺，营地帮你继续钓鱼、上钩更快。结束时会收到一份「专注渔获」。<br>（Beta：关掉页面计时也会继续，回来就能领取）', 'While you focus, the campfire burns brighter and the camp keeps fishing for you, with faster bites. When time is up you get a "Focus Catch".<br>(Beta: the timer keeps running even if you close the page — come back to claim it.)'));
@@ -841,7 +891,7 @@ function openPanel(p, arg) {
     const L = [['fire', T('🔥 营火噼啪', '🔥 Crackling fire')], ['wave', T('🌊 湖水', '🌊 Lake water')], ['bug', T('🦗 虫鸣（夜晚）', '🦗 Crickets (night)')], ['rain', T('🌧 雨声', '🌧 Rain')], ['music', T('🎷 Lofi 爵士', '🎷 Lofi jazz')]];
     for (const [k, n] of L) h += `<div class="row"><div style="width:130px">${n}</div><div class="grow"><input type="range" min="0" max="1" step=".05" value="${G.vol[k]}" data-vol="${k}"></div></div>`;
   } else if (p === 'set') {
-    h = head(T('⚙ 设置 · Beta v0.1.4', '⚙ Settings · Beta v0.1.4'), T('这是测试版：玩法、数值和存档可能会在后续版本中调整或重置。', 'This is a beta: gameplay, balance and save data may change or be reset in future versions.'));
+    h = head(T('⚙ 设置 · Beta v0.2.0', '⚙ Settings · Beta v0.2.0'), T('这是测试版：玩法、数值和存档可能会在后续版本中调整或重置。', 'This is a beta: gameplay, balance and save data may change or be reset in future versions.'));
     h += `<div class="row"><div class="grow"><b>${T('语言 Language', 'Language 语言')}</b><small>${T('界面、鱼和星座名称都会切换', 'Switches the interface, fish and constellation names')}</small></div><select id="sLang"><option value="zh">简体中文</option><option value="en">English</option></select></div>`;
     h += `<div class="row"><div class="grow"><b>${T('时间', 'Time')}</b><small>${T('默认跟随你的真实时间；白天测试时可以切到夜晚看星空', 'Follows your real clock by default; switch to night to see the stars during the day')}</small></div><select id="sTime"><option value="real">${T('跟随真实时间', 'Real time')}</option><option value="day">${T('体验：白天', 'Preview: Day')}</option><option value="dusk">${T('体验：黄昏', 'Preview: Dusk')}</option><option value="night">${T('体验：夜晚', 'Preview: Night')}</option></select></div>`;
     h += `<div class="row"><div class="grow"><b>${T('预览流星雨', 'Preview meteor shower')}</b><small>${T('真实的流星雨日期会自动开启；下一场：', 'Turns on automatically on real meteor-shower dates. Next: ')}${nextMeteor()}</small></div><button class="btn ${G.meteorPreview ? '' : 'alt'}" id="sMet">${G.meteorPreview ? T('开', 'On') : T('关', 'Off')}</button></div>`;
@@ -1005,16 +1055,404 @@ const sfx = {
   woof: () => { sound.tone(420, .08, 'square', .04, -120); sound.tone(380, .1, 'square', .04, -140, .12); }
 };
 
+// ============================================================ v0.2: level, items, editor, cosmetics, quests, scene art
+const PXC = { o: '#2b2233', w: '#fff8ea', r: '#d8483a', R: '#a8302a', y: '#ffd84a', Y: '#e0a82a', g: '#5aa84a', G: '#3a7a34', b: '#4a78d8', B: '#3458b0', n: '#8a5a3a', N: '#5a3a22', t: '#d8b07a', s: '#9aa0a8', S: '#6a707a', p: '#f08aa8', P: '#9a6ad8', c: '#7ad8e8', k: '#1a1626', l: '#fff3b0', a: '#ff9a3a', m: '#c8c8d8' };
+const ITEMS = [
+  { id: 'rocks', zh: '石头堆', en: 'Rock Pile', cat: 'nature', cost: 10, lvl: 1, b: 1, rep: 6, art: ['..ss....', '.ssSs.ss', 'sSsssSsS', 'SsSSsSSs'] },
+  { id: 'mushrooms', zh: '小蘑菇', en: 'Mushrooms', cat: 'nature', cost: 15, lvl: 1, b: 1, rep: 6, art: ['.rr.r.', 'rwrrwr', '.w..w.', '.w..w.'] },
+  { id: 'bush', zh: '灌木丛', en: 'Bush', cat: 'nature', cost: 20, lvl: 1, b: 2, rep: 6, art: ['...gggg...', '.gggGGggg.', 'gggGGgggGg', 'gGggggGggg', '.nn....nn.'] },
+  { id: 'flowers', zh: '野花丛', en: 'Wildflowers', cat: 'nature', cost: 35, lvl: 1, b: 3, rep: 4, art: ['.p...y.r', 'ppp.yyrr', '.p..gy.r', 'g.g.g.g.', 'GgGgGgGg'] },
+  { id: 'sapling', zh: '小松树', en: 'Pine Sapling', cat: 'nature', cost: 35, lvl: 2, b: 3, rep: 6, art: ['...gg...', '..gGGg..', '..gGGg..', '.gGGGGg.', '.gGGGGg.', 'gGGGGGGg', 'gGGGGGGg', '...nn...', '...nn...', '...nn...'] },
+  { id: 'firewood', zh: '柴堆', en: 'Firewood Stack', cat: 'camp', cost: 25, lvl: 1, b: 1, rep: 2, art: ['..nnnn..', '.nNNNNn.', 'nNnnnnNn', 'NnNnnNnN', 'nNnNNnNn'] },
+  { id: 'chair', zh: '折叠椅', en: 'Folding Chair', cat: 'camp', cost: 20, lvl: 1, b: 2, rep: 3, art: ['.bb.....', '.bb.....', '.bb.....', '.bbbbbbb', '.bbbbbbb', '.o....o.', '.o....o.', '.o....o.'] },
+  { id: 'mat', zh: '野餐垫', en: 'Picnic Mat', cat: 'camp', cost: 30, lvl: 1, b: 2, rep: 2, art: ['rwrwrwrwrwrw', 'wrwrwrwrwrwr', 'rwrwrwrwrwrw', 'wrwrwrwrwrwr'] },
+  { id: 'flag', zh: '营地小旗', en: 'Camp Pennant', cat: 'camp', cost: 20, lvl: 1, b: 2, rep: 3, art: ['Nrrrr', 'NRrr.', 'Nr...', 'N....', 'N....', 'N....', 'N....', 'N....'] },
+  { id: 'lantern', zh: '露营灯', en: 'Camp Lantern', cat: 'light', cost: 25, lvl: 1, b: 3, rep: 4, glow: { c: '255,220,120', r: 18, oy: .6 }, art: ['..o..', '.ooo.', 'oyyyo', 'oylyo', 'oyyyo', '.ooo.', '..o..', '.sss.'] },
+  { id: 'signpost', zh: '路标', en: 'Signpost', cat: 'camp', cost: 25, lvl: 2, b: 2, rep: 2, art: ['.tttttt.', 'ttttttt.', '.tttttt.', '..NN....', '..NN....', '..NN....', '..NN....', '..NN....'] },
+  { id: 'table', zh: '露营桌', en: 'Camp Table', cat: 'camp', cost: 60, lvl: 2, b: 3, rep: 2, tap: 'collect', coll: { w: 4 }, perk: ['点一下领零食 +4🔥（每 4 分钟）', 'Tap for a snack +4🔥 (every 4 min)'], art: ['.....cc.....', 'tttttttttttt', 'NNNNNNNNNNNN', 'N..........N', 'N..........N', 'N..........N', 'N..........N'] },
+  { id: 'cooler', zh: '冷藏箱', en: 'Cooler Box', cat: 'camp', cost: 50, lvl: 2, b: 2, rep: 3, tap: 'collect', coll: { w: 5 }, perk: ['点一下取冰饮 +5🔥；挂机更容易钓到鱼', 'Tap for a cold drink +5🔥; better auto-catch rate'], art: ['.mmmmmm.', 'mrrrrrrm', 'mrwwwwrm', 'mrrrrrrm', 'mmmmmmmm', '.o....o.'] },
+  { id: 'waterlight', zh: '水灯', en: 'Water Lantern', cat: 'light', cost: 40, lvl: 2, b: 3, rep: 6, water: true, glow: { c: '255,200,120', r: 14, oy: .5 }, art: ['..yy..', '.yllY.', 'pPPPPp', '.cccc.'] },
+  { id: 'bench', zh: '长椅', en: 'Bench', cat: 'camp', cost: 70, lvl: 3, b: 3, rep: 2, perk: ['专注奖励暖意 +20%', 'Focus Warmth +20%'], art: ['nnnnnnnnnnnn', 'nNNNNNNNNNNn', 'N..........N', 'nnnnnnnnnnnn', 'N..........N', 'N..........N'] },
+  { id: 'pumpkin', zh: '南瓜灯', en: 'Jack-o’-lantern', cat: 'light', cost: 30, lvl: 3, b: 2, rep: 4, glow: { c: '255,150,50', r: 14, oy: .55 }, art: ['...g...', '.aaaaa.', 'akaaaka', 'aaakaaa', 'akkkkka', '.aaaaa.'] },
+  { id: 'jar', zh: '萤火虫罐', en: 'Firefly Jar', cat: 'light', cost: 45, lvl: 3, b: 3, rep: 4, glow: { c: '210,255,120', r: 16, oy: .5, flick: true }, art: ['.mmm.', 'myylm', 'mlyym', 'myllm', '.mmm.', '.sss.'] },
+  { id: 'lights', zh: '串灯', en: 'String Lights', cat: 'light', cost: 40, lvl: 3, b: 4, rep: 3, glow: { c: '255,230,160', r: 20, oy: .15 }, art: ['.ryagb.', 'o.....o', 'o.....o', 'o.....o', 'o.....o', 'o.....o', 'o.....o'] },
+  { id: 'birdhouse', zh: '鸟屋', en: 'Birdhouse', cat: 'nature', cost: 55, lvl: 3, b: 3, rep: 2, tap: 'collect', coll: { d: 1 }, perk: ['点一下收鸟儿的礼物 +1✨（每 4 分钟）', 'Tap for a bird’s gift +1✨ (every 4 min)'], art: ['..rr..', '.rrrr.', 'rrrrrr', 'nttttn', 'ntkktn', 'nttttn', 'nnnnnn', '..NN..', '..NN..', '..NN..', '..NN..'] },
+  { id: 'doghouse', zh: '狗屋', en: 'Doghouse', cat: 'camp', cost: 110, lvl: 4, b: 4, rep: 1, art: ['.....rr.....', '....rrrr....', '...rrrrrr...', '..rrrrrrrr..', '.rrrrrrrrrr.', 'nnnnnnnnnnnn', 'nnnnkkkknnnn', 'nnnkkkkkknnn', 'nnnkkkkkknnn', 'NNNkkkkkkNNN'] },
+  { id: 'guitar', zh: '吉他', en: 'Guitar', cat: 'fun', cost: 120, lvl: 4, b: 4, rep: 1, tap: 'guitar', perk: ['点一下弹一曲，2 分钟内鱼更快上钩', 'Tap to strum — fish bite faster for 2 min'], art: ['..N...', '..N...', '..N...', '.ttt..', 'tttttt', 'tkkkkt', 'tttttt', '.tttt.'] },
+  { id: 'chime', zh: '风铃', en: 'Wind Chime', cat: 'fun', cost: 45, lvl: 4, b: 3, rep: 2, art: ['NNNNN', 'c.c.c', 'c.c.c', '.c.c.', '..N..', '..N..', '..N..', '..N..'] },
+  { id: 'scope', zh: '小望远镜', en: 'Little Telescope', cat: 'fun', cost: 60, lvl: 4, b: 3, rep: 1, perk: ['夜里每次钓到鱼额外 +1 星屑', '+1 Stardust for every fish caught at night'], art: ['.....mm.', '....mmm.', '...mmm..', '..mmm...', '..oo....', '..o.o...', '.o...o..', '.o...o..', 'o.....o.', 'o.....o.'] },
+  { id: 'snowman', zh: '雪人', en: 'Snowman', cat: 'nature', cost: 40, lvl: 4, b: 3, rep: 2, art: ['..kkkk..', '.kkkkkk.', '..wwww..', '.wkwwkw.', '..waaw..', '.wwwwww.', 'wwwkwwww', 'wwwwwwww', '.wwwwww.', '..wwww..'] },
+  { id: 'hammock', zh: '吊床', en: 'Hammock', cat: 'camp', cost: 90, lvl: 5, b: 5, rep: 1, perk: ['领取委托奖励时暖意 +20%', 'Quest warmth rewards +20%'], art: ['N..............N', 'Nbb..........bbN', 'N.bbbbbbbbbbbb.N', 'N..BBBBBBBBBB..N', 'N..............N', 'N..............N', 'N..............N'] },
+  { id: 'banner', zh: '星星串旗', en: 'Star Bunting', cat: 'light', cost: 80, lvl: 5, b: 4, rep: 1, glow: { c: '255,240,170', r: 22, oy: .3 }, art: ['NooooooooooooN', 'N.y.r.b.y.r.bN', 'N..y.r.b.y.r.N', 'N............N', 'N............N', 'N............N', 'N............N'] },
+  { id: 'boat', zh: '小木船', en: 'Little Boat', cat: 'fun', cost: 150, lvl: 6, b: 5, rep: 1, water: true, art: ['......NN......', 'nnnnnnnnnnnnnn', '.nnNnnnnnnNnn.', '..nnnnnnnnnn..'] }
+];
+const ITEMM = Object.fromEntries(ITEMS.map(i => [i.id, i]));
+ITEMS.forEach(i => { const w = i.art[0].length; if (i.art.some(r => r.length !== w)) console.error('bad sprite width:', i.id); });
+const CATS = { nature: ['🌿', '自然', 'Nature'], camp: ['⛺', '营地', 'Camp'], light: ['💡', '灯光', 'Lights'], fun: ['🎸', '趣味', 'Fun'] };
+const SPRC = {}, SPRU = {};
+function itemSpr(id) {
+  if (!SPRC[id]) { const rows = ITEMM[id].art, w = rows[0].length, h = rows.length, c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); rows.forEach((r, y) => { for (let x = 0; x < w; x++) { const col = PXC[r[x]]; if (col) { g.fillStyle = col; g.fillRect(x, y, 1, 1); } } }); SPRC[id] = c; }
+  return SPRC[id];
+}
+const itemURL = id => SPRU[id] || (SPRU[id] = itemSpr(id).toDataURL());
+
+// ---------------- cosmetics ----------------
+const COS = {
+  tent: [['orange', '#e8823a', '#c86428', 1, '暖橘', 'Amber'], ['teal', '#3aa8a0', '#2a807a', 1, '湖绿', 'Teal'], ['blue', '#4a78d8', '#3458b0', 2, '天蓝', 'Sky'], ['pink', '#e878a8', '#c05888', 2, '樱粉', 'Blossom'], ['green', '#5aa84a', '#3e8034', 3, '松绿', 'Pine'], ['purple', '#9a6ad8', '#7a4ab0', 4, '薰衣草', 'Lavender'], ['white', '#e8e8f0', '#b8b8d0', 5, '雪白', 'Snow'], ['navy', '#2a3a78', '#1a2858', 7, '星夜', 'Starry']],
+  hat: [['red', '#c84a3a', '', 1, '红', 'Red'], ['blue', '#3a6aa8', '', 1, '蓝', 'Blue'], ['yellow', '#e8b83a', '', 1, '黄', 'Yellow'], ['green', '#4a9a4a', '', 2, '绿', 'Green'], ['purple', '#8a5ac8', '', 3, '紫', 'Purple'], ['white', '#e8e8e8', '', 4, '白', 'White'], ['pink', '#e878a8', '', 5, '粉', 'Pink'], ['black', '#34303c', '', 6, '黑', 'Black']],
+  shirt: [['blue', '#3a6a9a', '', 1, '蓝', 'Blue'], ['red', '#c84a4a', '', 1, '红', 'Red'], ['green', '#3a8a5a', '', 1, '绿', 'Green'], ['mustard', '#c8982a', '', 2, '芥黄', 'Mustard'], ['purple', '#7a4aa8', '', 3, '紫', 'Purple'], ['grey', '#6a6a7a', '', 3, '灰', 'Grey'], ['white', '#dcdce8', '', 5, '白', 'White'], ['teal', '#2a9a9a', '', 6, '青', 'Teal']],
+  flame: [['orange', '#ffe36a', '#ff9a3c', 1, '暖橙火', 'Amber', '#e84a2a', '255,150,60'], ['blue', '#cfeaff', '#5aa8ff', 4, '蓝色火', 'Blue', '#2a5ad8', '90,160,255'], ['green', '#e8ffcf', '#6ad86a', 6, '翠绿火', 'Emerald', '#2a9a4a', '100,220,120'], ['violet', '#ffe0ff', '#e86ad8', 8, '紫晶火', 'Violet', '#a02ab8', '230,110,220']],
+  fur: [['tan', '#e0b07a', '', 1, '浅棕', 'Tan'], ['white', '#f0e8d8', '', 1, '奶白', 'Cream'], ['brown', '#a8784a', '', 1, '栗色', 'Brown'], ['ginger', '#e8924a', '', 2, '姜黄', 'Ginger'], ['grey', '#9a9aa8', '', 3, '灰', 'Grey'], ['black', '#5a5060', '', 4, '墨黑', 'Ink']],
+  collar: [['red', '#d8483a', '', 1, '红', 'Red'], ['blue', '#4a78d8', '', 1, '蓝', 'Blue'], ['green', '#5aa84a', '', 1, '绿', 'Green'], ['yellow', '#ffd84a', '', 2, '黄', 'Yellow'], ['pink', '#f08aa8', '', 3, '粉', 'Pink'], ['cyan', '#7ad8e8', '', 4, '青', 'Cyan']],
+  ground: [['meadow', '#6aa85a', '#5a9650', 1, '草地', 'Meadow'], ['lush', '#4a9a6a', '#3a8a5a', 2, '翠野', 'Lush'], ['autumn', '#b08a48', '#9a7638', 3, '秋叶', 'Autumn'], ['sand', '#d8c488', '#c8b070', 4, '沙地', 'Sand'], ['snow', '#e8f0f8', '#d0dce8', 5, '雪地', 'Snow'], ['moss', '#8aa860', '#789650', 6, '苔原', 'Moss']]
+};
+const COS_LAB = { tent: ['⛺', '帐篷', 'Tent'], flame: ['🔥', '营火', 'Campfire'], hat: ['🧢', '帽子', 'Hat'], shirt: ['👕', '上衣', 'Shirt'], fur: ['🐶', '小狗毛色', 'Dog fur'], collar: ['🎀', '项圈', 'Collar'], ground: ['🌱', '营地地面', 'Ground'] };
+function cosv(k) { const id = G.camp.cos[k] || COS[k][0][0], o = COS[k].find(x => x[0] === id) || COS[k][0]; return { id: o[0], a: o[1], b: o[2] || o[1], lvl: o[3], c: o[6], g: o[7] }; }
+const personPal = () => ({ r: cosv('hat').a, s: '#f4c89a', k: '#2b2233', b: cosv('shirt').a, h: '#f4c89a', p: '#4a4a6a' });
+const dogPal = () => ({ o: '#3b2a20', b: cosv('fur').a, k: '#2b2233', w: '#fff3e0', n: '#2b2233', c: cosv('collar').a });
+
+// ---------------- level / beauty ----------------
+const MAXL = 30, lvlNeed = L => 28 + L * 26;
+function levelInfo(xp) { let L = 1, rem = xp; while (L < MAXL && rem >= lvlNeed(L)) { rem -= lvlNeed(L); L++; } return { L, rem, need: lvlNeed(L), max: L >= MAXL }; }
+const levelNow = () => levelInfo(G.xp).L;
+const beauty = () => G.camp.placed.reduce((a, p) => a + (ITEMM[p.id] ? ITEMM[p.id].b : 0), 0);
+const BT = [[0, '简陋', 'Humble'], [10, '整洁', 'Tidy'], [25, '温馨', 'Cozy'], [45, '迷人', 'Charming'], [70, '梦幻', 'Dreamy']];
+const beautyTier = () => { const v = beauty(); let t = 1; BT.forEach((x, i) => { if (v >= x[0]) t = i + 1; }); return { t, zh: BT[t - 1][1], en: BT[t - 1][2] }; };
+const perk = id => G.camp.placed.filter(p => p.id === id).length;
+function gainXp(n) {
+  if (!n) return; n = Math.max(1, Math.round(n * (1 + beauty() / 250)));
+  const L0 = levelNow(); G.xp += n; const L1 = levelNow();
+  for (let L = L0 + 1; L <= L1; L++) levelUp(L);
+  campChip();
+}
+function levelUp(L) {
+  const w = 15 * L; G.warmth += w;
+  const un = ITEMS.filter(i => i.lvl === L).map(i => T(i.zh, i.en));
+  sfx.legend(); flash = Math.max(flash, .5);
+  showToast(null, T(`🎉 营地升级！Lv.${L}`, `🎉 Camp level up! Lv.${L}`), T(`暖意 +${w}`, `Warmth +${w}`) + (un.length ? T(' · 新上架：', ' · New in shop: ') + un.join('、') : ''), 5200);
+  hud(); save();
+}
+function campChip() {
+  const el = $('#hCamp'); if (!el) return;
+  const li = levelInfo(G.xp), pct = li.max ? 100 : Math.round(li.rem / li.need * 100);
+  el.innerHTML = `<div class="nm"><span>⛺ ${esc(G.camp.name || T('我的营地', 'My Camp'))}</span><b>Lv.${li.L}</b></div><div class="xp"><i style="width:${pct}%"></i></div>`;
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// ---------------- inventory & placement ----------------
+const invCount = id => G.camp.inv[id] || 0;
+const storedCount = id => invCount(id) - G.camp.placed.filter(p => p.id === id).length;
+function autoPlace(id) {
+  const d = ITEMM[id]; let best = null, bs = -1;
+  for (let k = 0; k < 16; k++) {
+    const c = { id, nx: .06 + Math.random() * .88, ny: .1 + Math.random() * .85, flip: Math.random() < .5 };
+    if (!scen) { best = c; break; }
+    const [x, y] = itemPos(c); let m = 1e9;
+    for (const o of G.camp.placed) { if (!ITEMM[o.id]) continue; const [ox, oy] = itemPos(o); m = Math.min(m, Math.hypot(ox - x, (oy - y) * 1.8)); }
+    if (!d.water) m = Math.min(m, Math.hypot(scen.fireX - x, (106 - y) * 1.4) * 1.3, Math.hypot(scen.fireX - 22 - x, (104 - y) * 1.4));
+    if (m > bs) { bs = m; best = c; }
+  }
+  G.camp.placed.push(best);
+}
+function addItem(id) { G.camp.inv[id] = invCount(id) + 1; if (!G.decor.includes(id)) G.decor.push(id); autoPlace(id); }
+function syncDecor() { for (const id of G.decor) if (ITEMM[id] && !invCount(id)) { G.camp.inv[id] = 1; autoPlace(id); } }
+function itemPos(p) {
+  const d = ITEMM[p.id];
+  if (d.water) return [scen.lakeX + 12 + p.nx * Math.max(10, W - scen.lakeX - 28), 106 + p.ny * 18];
+  return [8 + p.nx * Math.max(10, scen.lakeX - 22), 99 + p.ny * 25];
+}
+function setItemPos(p, x, y) {
+  const d = ITEMM[p.id];
+  if (d.water) { p.nx = clamp((x - scen.lakeX - 12) / Math.max(10, W - scen.lakeX - 28), 0, 1); p.ny = clamp((y - 106) / 18, 0, 1); }
+  else { p.nx = clamp((x - 8) / Math.max(10, scen.lakeX - 22), 0, 1); p.ny = clamp((y - 99) / 25, 0, 1); }
+}
+function hitItem(x, y) {
+  const order = G.camp.placed.map((p, i) => ({ p, i, y: itemPos(p)[1] })).sort((a, b) => b.y - a.y);
+  for (const o of order) { const c = itemSpr(o.p.id), [ix, iy] = itemPos(o.p); if (x >= ix - c.width / 2 - 3 && x <= ix + c.width / 2 + 3 && y >= iy - c.height - 3 && y <= iy + 3) return o.i; }
+  return -1;
+}
+const buff = { guitar: 0 };
+function itemTap(x, y) {
+  const i = hitItem(x, y); if (i < 0) return false;
+  const it = G.camp.placed[i], d = ITEMM[it.id], [ix, iy] = itemPos(it), top = iy - d.art.length - 2;
+  if (d.tap === 'guitar') { [392, 440, 523, 587, 659].sort(() => Math.random() - .5).slice(0, 3).forEach((f, k) => sound.tone(f, .9, 'triangle', .06, 0, k * .13)); floatTxt(ix, top, T('♪ 弹一曲', '♪ Strum'), '#ffd0a0'); buff.guitar = Date.now() + 120000; gainXp(1); return true; }
+  if (d.tap === 'collect') {
+    const now = Date.now(), cd = G.camp.cd[d.id] || 0;
+    if (now < cd) { floatTxt(ix, top, T(`再等 ${Math.ceil((cd - now) / 60000)} 分钟`, `Wait ${Math.ceil((cd - now) / 60000)} min`), '#fff'); return true; }
+    G.camp.cd[d.id] = now + 240000; const c = d.coll;
+    if (c.w) { G.warmth += c.w; floatTxt(ix, top, `+${c.w}🔥`); } if (c.d) { G.dust += c.d; floatTxt(ix, top, `+${c.d}✨`); }
+    sfx.catch(); gainXp(2); hud(); save(); return true;
+  }
+  return false;
+}
+function drawItems(nf) {
+  const list = G.camp.placed.filter(p => ITEMM[p.id]).map((p, i) => ({ p, i: G.camp.placed.indexOf(p), pos: itemPos(p) })).sort((a, b) => a.pos[1] - b.pos[1]);
+  if (edit.on) { ctx.strokeStyle = 'rgba(255,233,168,.4)'; ctx.setLineDash([2, 2]); ctx.strokeRect(6.5, 98.5, scen.lakeX - 14, 28); ctx.strokeRect(scen.lakeX + 8.5, 104.5, Math.max(8, W - scen.lakeX - 18), 22); ctx.setLineDash([]); }
+  for (const { p, i, pos } of list) {
+    const d = ITEMM[p.id], c = itemSpr(p.id), w = c.width, h = c.height, bob = d.water ? Math.round(Math.sin(tm * 2 + p.nx * 9)) : 0;
+    const x = Math.round(pos[0] - w / 2), y = Math.round(pos[1] - h) + bob;
+    ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.beginPath(); ctx.ellipse(pos[0], pos[1] + bob, w / 2 + 1, 1.5, 0, 0, 6.3); ctx.fill();
+    if (p.flip) { ctx.save(); ctx.translate(x + w, y); ctx.scale(-1, 1); ctx.drawImage(c, 0, 0); ctx.restore(); } else ctx.drawImage(c, x, y);
+    if (edit.on && i === edit.sel) { ctx.strokeStyle = '#ffe96a'; ctx.setLineDash([2, 1]); ctx.strokeRect(x - 1.5, y - 1.5, w + 3, h + 3); ctx.setLineDash([]); }
+  }
+}
+function drawItemGlows(nf) {
+  const gk = 1 / (1 + G.camp.placed.filter(p => ITEMM[p.id] && ITEMM[p.id].glow).length * .3);
+  G.camp.placed.forEach((p, i) => {
+    const d = ITEMM[p.id]; if (!d || !d.glow) return;
+    const [ix, iy] = itemPos(p), c = itemSpr(p.id), gx = ix, gy = iy - c.height * (d.glow.oy || .5), a = (.05 + nf * .3) * gk * (d.glow.flick ? .75 + .25 * Math.sin(tm * 3 + i) : 1);
+    const gr = ctx.createRadialGradient(gx, gy, 0, gx, gy, d.glow.r); gr.addColorStop(0, `rgba(${d.glow.c},${a})`); gr.addColorStop(1, `rgba(${d.glow.c},0)`);
+    ctx.fillStyle = gr; ctx.fillRect(gx - d.glow.r, gy - d.glow.r, d.glow.r * 2, d.glow.r * 2);
+  });
+}
+
+// ---------------- editor ----------------
+const edit = { on: false, sel: -1, drag: null };
+function editUI() {
+  const it = G.camp.placed[edit.sel], d = it && ITEMM[it.id];
+  $('#editName').textContent = d ? T(d.zh, d.en) : T('拖动物品来布置', 'Drag items to arrange');
+  $('#eFlip').disabled = $('#eStore').disabled = !d;
+}
+function startEdit(sel) {
+  closePanel(); edit.on = true; edit.sel = sel == null ? -1 : sel; edit.drag = null;
+  document.body.classList.add('editing'); $('#editBar').classList.remove('hide'); editUI();
+  showToast(null, T('🛠 布置模式', '🛠 Arrange mode'), T('拖动物品移动位置；点空白处取消选择', 'Drag to move items; tap empty space to deselect'), 2800);
+}
+function endEdit() { edit.on = false; edit.sel = -1; edit.drag = null; document.body.classList.remove('editing'); $('#editBar').classList.add('hide'); save(); }
+function editDown(e, x, y) {
+  const i = hitItem(x, y);
+  if (i >= 0) { edit.sel = i; const [ix, iy] = itemPos(G.camp.placed[i]); edit.drag = { dx: ix - x, dy: iy - y }; try { cv.setPointerCapture(e.pointerId); } catch (er) {} } else { edit.sel = -1; edit.drag = null; }
+  editUI();
+}
+cv.addEventListener('pointermove', e => { if (!edit.on || !edit.drag || edit.sel < 0) return; const [x, y] = sceneXY(e); setItemPos(G.camp.placed[edit.sel], x + edit.drag.dx, y + edit.drag.dy); });
+addEventListener('pointerup', () => { if (edit.drag) { edit.drag = null; save(); } });
+$('#eDone').onclick = endEdit;
+$('#eFlip').onclick = () => { const it = G.camp.placed[edit.sel]; if (it) { it.flip = !it.flip; save(); } };
+$('#eStore').onclick = () => { if (edit.sel >= 0) { G.camp.placed.splice(edit.sel, 1); edit.sel = -1; editUI(); save(); } };
+
+// ---------------- quests & achievements ----------------
+const QDEF = {
+  catch: { zh: n => `钓到 ${n} 条鱼`, en: n => `Catch ${n} fish`, n: [4, 6, 8] },
+  night: { zh: n => `夜里钓到 ${n} 条鱼`, en: n => `Catch ${n} fish at night`, n: [2, 3] },
+  rare: { zh: n => `钓到 ${n} 条珍稀鱼（价值 ≥6）`, en: n => `Catch ${n} rare fish (value ≥6)`, n: [1, 2] },
+  cook: { zh: n => `烤好 ${n} 份料理`, en: n => `Grill ${n} dishes`, n: [2, 3, 4] },
+  perfect: { zh: n => `完成 ${n} 次完美烤鱼`, en: n => `Make ${n} perfect grills`, n: [1, 2] },
+  focus: { zh: n => `完成 ${n} 次专注`, en: n => `Finish ${n} focus session`, n: [1] },
+  gift: { zh: n => `招待 ${n} 次来访的狐狸`, en: n => `Treat the visiting fox ${n} time`, n: [1] },
+  light: { zh: n => `点亮 ${n} 颗星`, en: n => `Light ${n} stars`, n: [2, 3] }
+};
+function genQuests() {
+  const d = new Date(), key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  if (G.quest && G.quest.day === key) return;
+  const R = seeded(d.getFullYear() * 400 + (d.getMonth() + 1) * 33 + d.getDate());
+  const ids = Object.keys(QDEF).sort(() => R() - .5).slice(0, 3);
+  G.quest = { day: key, bonus: false, list: ids.map(id => { const q = QDEF[id], n = q.n[Math.floor(R() * q.n.length)]; return { id, n, prog: 0, claimed: false, w: 10 + n * 6, d: n > 3 ? 2 : 1 }; }) };
+}
+function qEvent(id, k = 1) { genQuests(); G.quest.list.forEach(q => { if (q.id === id) q.prog = Math.min(q.n, q.prog + k); }); }
+function claimQuest(i) {
+  const q = G.quest.list[i]; if (!q || q.claimed || q.prog < q.n) return;
+  q.claimed = true; const w = Math.round(q.w * (1 + .2 * Math.min(1, perk('hammock'))));
+  G.warmth += w; G.dust += q.d; gainXp(15); sfx.chime();
+  if (G.quest.list.every(x => x.claimed) && !G.quest.bonus) { G.quest.bonus = true; G.dust += 5; G.warmth += 30; showToast(null, T('🎁 今日委托全部完成！', '🎁 All daily quests done!'), T('额外奖励：✨ +5 · 🔥 +30', 'Bonus: ✨ +5 · 🔥 +30'), 3600); }
+  hud(); save(); openQuest('q');
+}
+const discovered = () => Object.keys(G.book).length;
+const ACHS = [
+  { id: 'c1', zh: '初次垂钓', en: 'First Catch', ds: '钓到第 1 条鱼', de: 'Catch your first fish', w: 10, chk: () => G.catches >= 1 },
+  { id: 'c10', zh: '渐入佳境', en: 'Getting the Hang', ds: '累计钓到 10 次', de: 'Catch 10 times', w: 20, chk: () => G.catches >= 10 },
+  { id: 'c50', zh: '钓鱼爱好者', en: 'Angler', ds: '累计钓到 50 次', de: 'Catch 50 times', w: 50, chk: () => G.catches >= 50 },
+  { id: 'c200', zh: '湖边老手', en: 'Lake Veteran', ds: '累计钓到 200 次', de: 'Catch 200 times', w: 150, d: 5, chk: () => G.catches >= 200 },
+  { id: 'b10', zh: '小小收藏家', en: 'Little Collector', ds: '手帐发现 10 种', de: 'Discover 10 species', w: 40, chk: () => discovered() >= 10 },
+  { id: 'b20', zh: '图鉴达人', en: 'Journal Keeper', ds: '手帐发现 20 种', de: 'Discover 20 species', w: 100, d: 3, chk: () => discovered() >= 20 },
+  { id: 'b30', zh: '博物学家', en: 'Naturalist', ds: '手帐发现 30 种', de: 'Discover 30 species', w: 200, d: 6, chk: () => discovered() >= 30 },
+  { id: 'l1', zh: '星座回应了你', en: 'Stars Answered', ds: '召唤第 1 条传说鱼', de: 'Summon a legendary fish', w: 50, d: 3, chk: () => G.done.length >= 1 },
+  { id: 'l3', zh: '三星连珠', en: 'Triple Stars', ds: '召唤 3 条传说鱼', de: 'Summon 3 legendary fish', w: 120, d: 6, chk: () => G.done.length >= 3 },
+  { id: 'k10', zh: '营火厨师', en: 'Campfire Cook', ds: '烤好 10 份料理', de: 'Grill 10 dishes', w: 30, chk: () => G.stats.cooked >= 10 },
+  { id: 'p5', zh: '火候大师', en: 'Heat Master', ds: '完成 5 次完美烤鱼', de: 'Make 5 perfect grills', w: 60, chk: () => G.stats.perfect >= 5 },
+  { id: 'p25', zh: '米其林营地', en: 'Camp Michelin', ds: '完成 25 次完美烤鱼', de: 'Make 25 perfect grills', w: 200, d: 5, chk: () => G.stats.perfect >= 25 },
+  { id: 'v5', zh: '营地升级', en: 'Level 5', ds: '营地达到 Lv.5', de: 'Reach camp level 5', w: 60, chk: () => levelNow() >= 5 },
+  { id: 'v10', zh: '资深露营者', en: 'Seasoned Camper', ds: '营地达到 Lv.10', de: 'Reach camp level 10', w: 150, d: 5, chk: () => levelNow() >= 10 },
+  { id: 'v20', zh: '营地传奇', en: 'Camp Legend', ds: '营地达到 Lv.20', de: 'Reach camp level 20', w: 400, d: 10, chk: () => levelNow() >= 20 },
+  { id: 'pl10', zh: '装饰迷', en: 'Decorator', ds: '摆放 10 件物品', de: 'Place 10 items', w: 60, chk: () => G.camp.placed.length >= 10 },
+  { id: 'be25', zh: '温馨小窝', en: 'Cozy Nook', ds: '营地美观度达到 25', de: 'Reach camp charm 25', w: 80, d: 3, chk: () => beauty() >= 25 },
+  { id: 'be70', zh: '梦幻营地', en: 'Dream Camp', ds: '营地美观度达到 70', de: 'Reach camp charm 70', w: 250, d: 8, chk: () => beauty() >= 70 },
+  { id: 'f60', zh: '专注一小时', en: 'Focused Hour', ds: '累计专注 60 分钟', de: 'Focus for 60 minutes total', w: 60, chk: () => G.stats.focusMin >= 60 },
+  { id: 'g5', zh: '好客的主人', en: 'Good Host', ds: '招待狐狸 5 次', de: 'Treat the fox 5 times', w: 60, chk: () => G.gifts >= 5 },
+  { id: 'r40', zh: '大鱼！', en: 'Big One!', ds: '钓到一条 40cm 以上的鱼', de: 'Land a fish over 40cm', w: 80, chk: () => Object.values(G.rec).some(v => v >= 40) }
+];
+function checkAch() {
+  const lit = Object.values(G.lit).reduce((a, b) => a + b, 0);
+  if (lit > G.stats.lit) { qEvent('light', lit - G.stats.lit); G.stats.lit = lit; }
+  for (const a of ACHS) if (!G.ach[a.id] && a.chk()) {
+    G.ach[a.id] = Date.now(); G.warmth += a.w; if (a.d) G.dust += a.d; sfx.chime(); hud(); save();
+    showToast(null, T('🏅 成就达成：', '🏅 Achievement: ') + T(a.zh, a.en), T(`暖意 +${a.w}`, `Warmth +${a.w}`) + (a.d ? ` · ✨ +${a.d}` : ''), 4200);
+    break;
+  }
+}
+
+// ---------------- new panels ----------------
+const NEWP = { camp: openCamp, quest: openQuest, more: openMore };
+let campTab = 'look';
+function openPanel(p, arg) { if (NEWP[p]) NEWP[p](arg); else openPanelBase(p, arg); }
+const showCard = h => { card.innerHTML = h; panel.classList.remove('hide'); };
+function campHeader() {
+  const li = levelInfo(G.xp), pct = li.max ? 100 : Math.round(li.rem / li.need * 100), bt = beautyTier();
+  return `<div class="campcard"><input id="campName" maxlength="14" value="${esc(G.camp.name)}" placeholder="${T('给营地起个名字', 'Name your camp')}"><div class="xpline"><b>Lv.${li.L}</b><div class="meter"><i style="width:${pct}%"></i></div><small>${li.max ? 'MAX' : li.rem + ' / ' + li.need + ' XP'}</small></div><div class="beauty">${T('营地美观度', 'Camp charm')} <b>${beauty()}</b> · ${'★'.repeat(bt.t)}${'☆'.repeat(5 - bt.t)} ${T(bt.zh, bt.en)}</div></div>`;
+}
+function openCamp(tab) {
+  if (typeof tab === 'string') campTab = tab;
+  const tabs = [['look', '🎨', T('装扮', 'Style')], ['items', '🪑', T('摆件', 'Items')], ['shop', '🛒', T('商店', 'Shop')]];
+  let h = head(T('⛺ 我的营地', '⛺ My Camp'), '') + campHeader() + `<div class="tabs">${tabs.map(([k, i, n]) => `<button class="tab ${campTab === k ? 'on' : ''}" data-tab="${k}">${i} ${n}</button>`).join('')}</div>`;
+  const L = levelNow();
+  if (campTab === 'look') {
+    for (const k of Object.keys(COS)) {
+      h += `<div class="seclab">${COS_LAB[k][0]} ${T(COS_LAB[k][1], COS_LAB[k][2])}</div><div class="swgrid">` + COS[k].map(o => { const locked = L < o[3], on = cosv(k).id === o[0]; return `<button class="sw ${on ? 'on' : ''} ${locked ? 'lock' : ''}" data-cos="${k}:${o[0]}" title="${T(o[4], o[5])}${locked ? ' · Lv.' + o[3] : ''}" style="--c:${o[1]};--c2:${o[2] || o[1]}">${locked ? `<em>Lv${o[3]}</em>` : ''}</button>`; }).join('') + `</div>`;
+    }
+  } else if (campTab === 'items') {
+    const stored = Object.keys(G.camp.inv).filter(id => ITEMM[id] && storedCount(id) > 0), groups = {};
+    G.camp.placed.forEach(p => { if (ITEMM[p.id]) groups[p.id] = (groups[p.id] || 0) + 1; });
+    h += `<div class="center" style="margin:10px 0 4px"><button class="btn big" id="eEnter">🛠 ${T('布置营地（拖动摆放）', 'Arrange camp (drag items)')}</button></div><div class="sub center">${T(`已摆放 ${G.camp.placed.length} 件 · 仓库 ${stored.reduce((a, id) => a + storedCount(id), 0)} 件`, `${G.camp.placed.length} placed · ${stored.reduce((a, id) => a + storedCount(id), 0)} in storage`)}</div>`;
+    if (stored.length) { h += `<div class="seclab">📦 ${T('仓库', 'Storage')}</div>`; for (const id of stored) { const d = ITEMM[id]; h += `<div class="row"><img class="itemimg" src="${itemURL(id)}"><div class="grow"><b>${T(d.zh, d.en)}</b> ×${storedCount(id)}</div><button class="btn" data-place="${id}">${T('摆放', 'Place')}</button></div>`; } }
+    h += `<div class="seclab">🏕 ${T('营地里的物品', 'In your camp')}</div>`;
+    if (!Object.keys(groups).length) h += `<div class="sub">${T('还没有摆件，去「商店」逛逛吧。', 'Nothing here yet — check the Shop.')}</div>`;
+    for (const id of Object.keys(groups)) { const d = ITEMM[id]; h += `<div class="row"><img class="itemimg" src="${itemURL(id)}"><div class="grow"><b>${T(d.zh, d.en)}</b> ×${groups[id]}<small>${d.perk ? T(d.perk[0], d.perk[1]) : T(`美观度 +${d.b}`, `Charm +${d.b}`)}</small></div><button class="btn alt" data-unplace="${id}">${T('收起', 'Store')}</button></div>`; }
+  } else {
+    const sorted = ITEMS.slice().sort((a, b) => a.lvl - b.lvl || a.cost - b.cost);
+    h += `<div class="sub" style="margin-top:8px">${T('用暖意 🔥 购买，买下会自动摆放，之后可拖动调整。', 'Pay with Warmth 🔥. Items are placed automatically — drag to adjust later.')} 🔥 <b>${G.warmth}</b></div>`;
+    for (const d of sorted) {
+      const own = invCount(d.id), max = d.rep || 1, locked = L < d.lvl, full = own >= max;
+      h += `<div class="row"><img class="itemimg" src="${itemURL(d.id)}"><div class="grow"><b>${T(d.zh, d.en)}</b> <span class="badge">${CATS[d.cat][0]} ${T(CATS[d.cat][1], CATS[d.cat][2])}</span><small>${d.perk ? T(d.perk[0], d.perk[1]) : T(`美观度 +${d.b}`, `Charm +${d.b}`)}${max > 1 ? T(` · 已有 ${own}/${max}`, ` · owned ${own}/${max}`) : ''}</small>${locked ? `<div class="lockt">🔒 ${T('营地 Lv.' + d.lvl + ' 解锁', 'Unlocks at camp Lv.' + d.lvl)}</div>` : ''}</div><button class="btn" data-buy="${d.id}" ${locked || full || G.warmth < d.cost ? 'disabled' : ''}>${full ? T('已拥有', 'Owned') : d.cost + ' 🔥'}</button></div>`;
+    }
+  }
+  showCard(h);
+  card.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => openCamp(b.dataset.tab));
+  const nm = card.querySelector('#campName'); if (nm) nm.oninput = () => { G.camp.name = nm.value.slice(0, 14); campChip(); save(); };
+  card.querySelectorAll('[data-cos]').forEach(b => b.onclick = () => { const [k, id] = b.dataset.cos.split(':'), o = COS[k].find(x => x[0] === id); if (levelNow() < o[3]) { showToast(null, T('🔒 还没解锁', '🔒 Locked'), T('营地升到 Lv.' + o[3] + ' 解锁', 'Unlocks at camp Lv.' + o[3]), 1800); return; } G.camp.cos[k] = id; sfx.twinkle(); save(); openCamp(); });
+  const ee = card.querySelector('#eEnter'); if (ee) ee.onclick = () => startEdit(-1);
+  card.querySelectorAll('[data-place]').forEach(b => b.onclick = () => { autoPlace(b.dataset.place); startEdit(G.camp.placed.length - 1); });
+  card.querySelectorAll('[data-unplace]').forEach(b => b.onclick = () => { const i = G.camp.placed.map(p => p.id).lastIndexOf(b.dataset.unplace); if (i >= 0) G.camp.placed.splice(i, 1); save(); openCamp(); });
+  card.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => { const d = ITEMM[b.dataset.buy]; if (levelNow() < d.lvl || invCount(d.id) >= (d.rep || 1) || G.warmth < d.cost) return; G.warmth -= d.cost; addItem(d.id); sfx.chime(); hud(); save(); showToast(null, T('🛒 已购买并摆放：', '🛒 Bought & placed: ') + T(d.zh, d.en), T('在「摆件 → 布置营地」里拖动调整位置', 'Drag it into place via Items → Arrange'), 3200); openCamp(); });
+}
+let questTab = 'q';
+function openQuest(tab) {
+  if (typeof tab === 'string') questTab = tab; genQuests();
+  let h = head(T('📜 委托与成就', '📜 Quests & Badges'), '') + `<div class="tabs"><button class="tab ${questTab === 'q' ? 'on' : ''}" data-qt="q">📜 ${T('今日委托', 'Daily Quests')}</button><button class="tab ${questTab === 'a' ? 'on' : ''}" data-qt="a">🏅 ${T('成就', 'Badges')} ${Object.keys(G.ach).length}/${ACHS.length}</button></div>`;
+  if (questTab === 'q') {
+    h += `<div class="sub">${T('每天 0 点刷新 3 个委托；全部完成还有额外奖励。', 'Three new quests every midnight; finish them all for a bonus.')}</div>`;
+    G.quest.list.forEach((q, i) => { const d = QDEF[q.id], pct = Math.round(q.prog / q.n * 100); h += `<div class="row"><div class="grow"><b>${T(d.zh(q.n), d.en(q.n))}</b><div class="qmeter"><div class="meter"><i style="width:${pct}%"></i></div><small>${q.prog}/${q.n}</small></div><small>${T('奖励', 'Reward')}：🔥 ${q.w} · ✨ ${q.d} · XP 15</small></div><button class="btn" data-claim="${i}" ${q.claimed || q.prog < q.n ? 'disabled' : ''}>${q.claimed ? T('已领取', 'Done') : q.prog < q.n ? T('进行中', 'Open') : T('领取', 'Claim')}</button></div>`; });
+    h += `<div class="sub" style="margin-top:10px">${G.quest.bonus ? T('🎁 今日额外奖励已领取', '🎁 Bonus claimed') : T('🎁 全部完成：✨ +5 · 🔥 +30', '🎁 Finish all: ✨ +5 · 🔥 +30')}</div>`;
+  } else {
+    for (const a of ACHS) { const done = !!G.ach[a.id]; h += `<div class="row" style="opacity:${done ? 1 : .6}"><div style="font-size:24px">${done ? '🏅' : '🔒'}</div><div class="grow"><b>${T(a.zh, a.en)}</b><small>${T(a.ds, a.de)} · 🔥 ${a.w}${a.d ? ' · ✨ ' + a.d : ''}</small></div></div>`; }
+  }
+  showCard(h);
+  card.querySelectorAll('[data-qt]').forEach(b => b.onclick = () => openQuest(b.dataset.qt));
+  card.querySelectorAll('[data-claim]').forEach(b => b.onclick = () => claimQuest(+b.dataset.claim));
+}
+function openMore() {
+  const tiles = [['book', '📖', T('钓鱼手帐', 'Journal')], ['focus', '⏳', T('专注时光', 'Focus')], ['worry', '📝', T('烧烦恼', 'Burn Worries')], ['sound', '🎧', T('声音', 'Sound')], ['quest', '📜', T('委托与成就', 'Quests')], ['set', '⚙', T('设置', 'Settings')], ['help', '❔', T('玩法', 'How to')], ['strip', '▭', T('条状模式', 'Strip Mode')], ['lang', '🌐', T('语言', 'Language')]];
+  showCard(head(T('☰ 更多', '☰ More'), '') + `<div class="tiles">${tiles.map(([k, i, n]) => `<button class="tile" data-go="${k}"><i>${i}</i>${n}</button>`).join('')}</div>`);
+  card.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { const k = b.dataset.go; if (k === 'strip') { closePanel(); $('#bStrip').click(); } else if (k === 'lang') { $('#bLang').click(); openMore(); } else openPanel(k); });
+}
+
+// ---------------- wrappers ----------------
+const _land = land;
+land = function (f, auto) {
+  _land(f, auto);
+  if (!f.junk) { qEvent('catch'); if (nightFactor(hourNow()) > .6) qEvent('night'); if (f.v >= 6) qEvent('rare'); }
+  const base = f.junk ? 0 : 10 + f.v * 3, cm = base ? Math.round(base * (.65 + Math.random() * .75)) : 0;
+  if (cm) { const old = G.rec[f.id] || 0; if (cm > old) G.rec[f.id] = cm; $('#tTitle').textContent += ` · ${cm}cm` + (cm > old && old ? ' ⭐' : ''); }
+  gainXp(f.junk ? 1 : f.legend ? 40 : Math.ceil(f.v / 2) + 1);
+};
+const _grillAct = grillAct;
+grillAct = function (i, auto) {
+  const s = G.grill[i], d0 = G.dishes, k = s ? s.t / SIDE : 0, perfectNow = !auto && k >= GOLD0 && k <= GOLD1, pA = s && s.pA;
+  _grillAct(i, auto);
+  if (G.dishes > d0) { G.stats.cooked++; qEvent('cook'); gainXp(3); if (pA && perfectNow) { G.stats.perfect++; qEvent('perfect'); gainXp(4); } }
+};
+const _giftVisitor = giftVisitor;
+giftVisitor = function () { const g0 = G.gifts; _giftVisitor(); if (G.gifts > g0) { qEvent('gift'); gainXp(8); syncDecor(); } };
+const _endFocus = endFocus;
+endFocus = function (done) { _endFocus(done); if (done) { qEvent('focus'); G.stats.focusMin += focus.len; G.warmth += Math.round(focus.len * .2 * Math.min(2, perk('bench'))); gainXp(focus.len * 1.2); hud(); } };
+const _biteWait = biteWait;
+biteWait = function () { return _biteWait() * (Date.now() < buff.guitar ? .8 : 1); };
+const _autoResolve = autoResolve;
+autoResolve = function () { const c = Math.min(3, perk('cooler')); G.up.auto += c; _autoResolve(); G.up.auto -= c; };
+
+// ---------------- scene art ----------------
+const rgbaC = (h, a) => { const c = [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; return `rgba(${c[0]},${c[1]},${c[2]},${a})`; };
+function drawFar(nf) {
+  const m1 = mix('#6a78b0', '#1c2244', nf), m2 = mix('#52609e', '#171c3c', nf);
+  ctx.fillStyle = m1; ctx.beginPath(); ctx.moveTo(0, 96);
+  for (let x = 0; x <= W; x += 3) ctx.lineTo(x, 66 - Math.abs(Math.sin(x * .021 + .7)) * 20 - Math.sin(x * .09) * 2);
+  ctx.lineTo(W, 96); ctx.fill();
+  ctx.fillStyle = m2; ctx.beginPath(); ctx.moveTo(0, 96);
+  for (let x = 0; x <= W; x += 3) ctx.lineTo(x, 76 - Math.abs(Math.sin(x * .03 + 2.2)) * 13 - Math.sin(x * .11) * 2);
+  ctx.lineTo(W, 96); ctx.fill();
+  if (nf < .75) { // drifting clouds
+    for (let k = 0; k < 6; k++) {
+      const x = ((k * 53 + tm * (1.5 + k * .45)) % (W + 70)) - 35, y = 10 + (k % 3) * 15 - Math.floor(k / 3) * PAD * .55, w = 16 + (k % 3) * 6, a = (1 - nf) * .55, c = `rgba(255,${240 - nf * 60},${225 - nf * 70},${a})`;
+      ctx.fillStyle = c; ctx.fillRect(x, y, w, 3); ctx.fillRect(x + 3, y - 2, w - 7, 3); ctx.fillRect(x + w * .35, y - 4, w * .3, 2);
+    }
+  }
+  if (nf > .7 && season() === 'winter') { // aurora
+    for (let b = 0; b < 3; b++) for (let x = 0; x < W; x += 2) { const y = 28 - PAD * .35 + Math.sin(x * .045 + tm * .5 + b * 2) * 8 + b * 7; ctx.fillStyle = b === 1 ? `rgba(160,120,255,${.05 * nf})` : `rgba(100,255,190,${.06 * nf})`; ctx.fillRect(x, y, 2, 15); }
+  }
+}
+function drawGroundDetail(nf) {
+  const sc = scen, gp = cosv('ground');
+  if (!sc.tufts || sc.tuftsFor !== sc.lakeX) { const R = seeded(33); sc.tufts = Array.from({ length: Math.round(sc.lakeX / 2.6) }, () => ({ x: R() * (sc.lakeX - 4), y: 93 + R() * 31, k: R(), f: R() })); sc.tuftsFor = sc.lakeX; }
+  const t1 = mix(gp.b, '#1a2a24', nf * .85), t2 = mix(gp.a, '#223630', nf * .8);
+  for (const t of sc.tufts) { px(t.x, t.y, 1, 2, t.k < .5 ? t1 : t2); if (t.f > .86) px(t.x + 1, t.y - 1, 1, 1, mix(['#ff9ab8', '#ffe08a', '#c8a0ff', '#fff'][Math.floor(t.k * 4)], '#554466', nf * .6)); }
+  // dirt path tent -> fire
+  for (let x = sc.tentX + 10; x < sc.fireX - 5; x += 1) px(x, 110 + Math.round(Math.sin(x * .3)), 1, 2, mix('#c0a070', '#3a3226', nf * .8));
+  // fire ring stones
+  for (let i = 0; i < 9; i++) { const a = i / 9 * 6.28; px(sc.fireX + Math.cos(a) * 8, 107 + Math.sin(a) * 2.4, 2, 1, mix(i % 2 ? '#9aa0a8' : '#7a808a', '#2a2e38', nf * .7)); }
+  // water: sparkle + lily pads
+  const wl = sc.lakeX + 6;
+  for (let i = 0; i < 16; i++) { const x = wl + ((i * 37 + Math.floor(tm * 2 + i)) % Math.max(10, W - wl - 4)), y = 100 + (i * 13) % 24; if (Math.sin(tm * 2.2 + i * 1.7) > .65) px(x, y, 2, 1, `rgba(255,255,255,${.5 * (1 - nf * .55)})`); }
+  for (let i = 0; i < 4; i++) { const x = wl + 12 + i * 29 % Math.max(14, W - wl - 18), y = 110 + (i * 7) % 12; px(x, y, 4, 2, mix('#4a9a5a', '#14301f', nf * .8)); px(x + 1, y - 1, 2, 1, mix('#5ab06a', '#18382a', nf * .8)); }
+}
+function drawTentDetail(tx, ty, nf) {
+  const t = cosv('tent');
+  px(tx + 13, ty - 20, 1, 6, '#6a4a30'); px(tx + 14, ty - 20, 4, 2, mix(t.b, '#2a1e30', nf * .6)); px(tx + 14, ty - 18, 3, 1, mix(t.b, '#2a1e30', nf * .6));
+  px(tx + 10, ty + 1, 1, 3, '#2b2233'); px(tx + 16, ty + 1, 1, 3, '#2b2233'); px(tx - 3, ty + 3, 2, 1, '#6a4a30'); px(tx + 27, ty + 3, 2, 1, '#6a4a30');
+  for (let i = 0; i < 3; i++) px(tx + 4 + i * 9, ty - 2 - i * 0, 1, 1, rgbaC('#ffffff', .22));
+}
+function drawFinish(nf) {
+  if (nf > .35) {
+    ctx.globalCompositeOperation = 'lighter';
+    const n = season() === 'summer' ? 14 : 9;
+    for (let i = 0; i < n; i++) {
+      const bx = (i * 47) % Math.max(60, scen.lakeX), x = bx + Math.sin(tm * .35 + i * 2.1) * 12, y = 96 + ((i * 29) % 26) + Math.cos(tm * .4 + i * 1.3) * 5, a = Math.max(0, Math.sin(tm * 1.7 + i * 3.1)) * nf;
+      if (a < .05) continue;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, 4); g.addColorStop(0, `rgba(230,255,140,${a * .8})`); g.addColorStop(1, 'rgba(230,255,140,0)'); ctx.fillStyle = g; ctx.fillRect(x - 4, y - 4, 8, 8); px(x, y, 1, 1, `rgba(255,255,220,${a})`);
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+  const vg = ctx.createRadialGradient(W / 2, 62, Math.min(W, H) * .35, W / 2, 62, Math.max(W, H + PAD) * .85);
+  vg.addColorStop(0, 'rgba(6,8,24,0)'); vg.addColorStop(1, `rgba(6,8,24,${.2 + nf * .3})`);
+  ctx.fillStyle = vg; ctx.fillRect(0, -PAD, W, H + PAD);
+}
+
+// ---------------- init ----------------
+(function initV2() {
+  cv.style.touchAction = 'none';
+  syncDecor(); genQuests(); campChip();
+  setInterval(() => { genQuests(); checkAch(); campChip(); }, 1500);
+  Object.assign(FISH_EN, NEWFISH_EN);
+  $('#hCamp').onclick = () => openPanel('camp');
+})();
+
 // ============================================================ language
-const UI = { auto: ['挂机钓鱼', 'Auto Fish'], cook: ['营火烹饪', 'Campfire'], star: ['星图', 'Star Map'], book: ['手帐', 'Journal'], focus: ['专注', 'Focus'], worry: ['烧烦恼', 'Burn Worries'], sound: ['声音', 'Sound'], strip: ['条状模式', 'Strip Mode'], set: ['设置', 'Settings'], lang: ['English', '中文'], help: ['玩法', 'How to'] };
+const UI = { auto: ['挂机钓鱼', 'Auto Fish'], cook: ['营火烹饪', 'Campfire'], star: ['星图', 'Star Map'], book: ['手帐', 'Journal'], focus: ['专注', 'Focus'], worry: ['烧烦恼', 'Burn Worries'], sound: ['声音', 'Sound'], strip: ['条状模式', 'Strip Mode'], set: ['设置', 'Settings'], lang: ['English', '中文'], help: ['玩法', 'How to'], camp: ['营地', 'Camp'], more: ['更多', 'More'] };
 function applyLang() {
   document.documentElement.lang = T('zh-CN', 'en');
   document.title = T('钓星营地 Star Bait Camp · Beta', 'Star Bait Camp · Beta');
   document.querySelectorAll('[data-k]').forEach(e => { e.textContent = T(UI[e.dataset.k][0], UI[e.dataset.k][1]); });
   $('#reelNote').textContent = T('点击屏幕任意处收竿', 'Tap anywhere to reel in');
   $('#intro').innerHTML = T(
-    '<b style="color:#ffe9a8;font-size:15px">钓星营地 · Star Bait Camp</b><br>屏幕底部的小营地陪你工作；今晚真实的星空，决定你钓到什么。<br><span style="opacity:.75">这是 <b>Beta 测试版 v0.1.4</b>：玩法和存档随时可能调整。点「⚙」可以切换夜晚、预览流星雨。<br>点湖面上的浮漂收竿 · 挂机也会自动钓鱼 · 传说鱼需要亲手拉上来</span><br><span style="opacity:.5;font-size:11px">© 2026 wilsonmah 版权所有 · <a href="https://github.com/wilsonmah/star-bait-camp/issues" target="_blank" rel="noopener">反馈建议</a></span>',
-    '<b style="color:#ffe9a8;font-size:15px">Star Bait Camp · 钓星营地</b><br>A tiny camp at the bottom of your screen keeps you company — tonight’s real sky decides what you catch.<br><span style="opacity:.75">This is <b>Beta v0.1.4</b>: gameplay and saves may change anytime. Open “⚙” to switch to night or preview a meteor shower.<br>Tap the bobber to reel in · The camp also fishes on its own · Legendary fish must be landed by hand</span><br><span style="opacity:.5;font-size:11px">© 2026 wilsonmah · All Rights Reserved · <a href="https://github.com/wilsonmah/star-bait-camp/issues" target="_blank" rel="noopener">Feedback</a></span>');
+    '<b style="color:#ffe9a8;font-size:15px">钓星营地 · Star Bait Camp</b><br>屏幕底部的小营地陪你工作；今晚真实的星空，决定你钓到什么。<br><span style="opacity:.75">这是 <b>Beta 测试版 v0.2.0</b>：玩法和存档随时可能调整。点「⚙」可以切换夜晚、预览流星雨。<br>点湖面上的浮漂收竿 · 挂机也会自动钓鱼 · 传说鱼需要亲手拉上来</span><br><span style="opacity:.5;font-size:11px">© 2026 wilsonmah 版权所有 · <a href="https://github.com/wilsonmah/star-bait-camp/issues" target="_blank" rel="noopener">反馈建议</a></span>',
+    '<b style="color:#ffe9a8;font-size:15px">Star Bait Camp · 钓星营地</b><br>A tiny camp at the bottom of your screen keeps you company — tonight’s real sky decides what you catch.<br><span style="opacity:.75">This is <b>Beta v0.2.0</b>: gameplay and saves may change anytime. Open “⚙” to switch to night or preview a meteor shower.<br>Tap the bobber to reel in · The camp also fishes on its own · Legendary fish must be landed by hand</span><br><span style="opacity:.5;font-size:11px">© 2026 wilsonmah · All Rights Reserved · <a href="https://github.com/wilsonmah/star-bait-camp/issues" target="_blank" rel="noopener">Feedback</a></span>');
   layout();
 }
 
